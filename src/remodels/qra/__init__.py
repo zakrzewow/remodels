@@ -86,13 +86,16 @@ class QRA:
         :rtype: QRA
         """
         beta = _lqra(X, y, self.quantile, 0, self.fit_intercept)
+        self._assign_coef_and_intercept(beta)
+        return self
+
+    def _assign_coef_and_intercept(self, beta: np.array):
         if self.fit_intercept:
             self._coef = beta[1:]
             self._intercept = beta[0]
         else:
             self._coef = beta
             self._intercept = 0
-        return self
 
     def predict(self, X: np.array) -> np.array:
         """Predicts dependent variable.
@@ -105,7 +108,7 @@ class QRA:
         return X @ self._coef + self._intercept
 
 
-class QRM:
+class QRM(QRA):
     """QRM."""
 
     def __init__(self, quantile: float, fit_intercept: bool = False) -> None:
@@ -116,10 +119,9 @@ class QRM:
         :param fit_intercept: True if fit intercept in QRA model, defaults to False
         :type fit_intercept: bool, optional
         """
-        self.quantile = quantile
-        self.fit_intercept = fit_intercept
+        super().__init__(quantile=quantile, fit_intercept=fit_intercept)
 
-    def fit(self, X, y):
+    def fit(self, X: np.array, y: np.array) -> "QRM":
         """Fits QRM model.
 
         :param X: input matrix
@@ -130,16 +132,9 @@ class QRM:
         :rtype: QRM
         """
         X = np.mean(X, axis=1, keepdims=True)
-        beta = _lqra(X, y, self.quantile, 0, self.fit_intercept)
-        if self.fit_intercept:
-            self._coef = beta[1:]
-            self._intercept = beta[0]
-        else:
-            self._coef = beta
-            self._intercept = 0
-        return self
+        return super().fit(X, y)
 
-    def predict(self, X):
+    def predict(self, X: np.array) -> np.array:
         """Predicts dependent variable.
 
         :param X: input matrix
@@ -148,4 +143,4 @@ class QRM:
         :rtype: np.array
         """
         X = np.mean(X, axis=1, keepdims=True)
-        return X @ self._coef + self._intercept
+        return super().predict(X)
