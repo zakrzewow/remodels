@@ -51,6 +51,11 @@ ipykernel = "^6.25.2"
 [tool.poetry.scripts]
 remodels = "remodels.__main__:main"
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 tests = ["tests", "*/tests"]
