@@ -1,10 +1,19 @@
 """QRA methods."""
 
+from typing import Tuple
+
 import numpy as np
-from scipy.optimize import linprog as scipy_linprog
+from numpy.linalg import lstsq
+from scipy.optimize import linprog
 from scipy.optimize import minimize
 from scipy.stats import iqr
 from scipy.stats import norm
+
+
+def _add_intercept(X: np.array) -> np.array:
+    new_X = np.ones(shape=(X.shape[0], X.shape[1] + 1))
+    new_X[:, 1:] = X
+    return new_X
 
 
 def _lqra(X, y, quantile: float, lambda_: float = 0.0, fit_intercept: bool = False):
@@ -13,7 +22,7 @@ def _lqra(X, y, quantile: float, lambda_: float = 0.0, fit_intercept: bool = Fal
 
     if fit_intercept:
         K += 1
-        X = np.concatenate([np.ones((N, 1)), X], axis=1)
+        X = _add_intercept(X)
 
     # scaling regularization parameter to make it sample-independent
     lambda_ = N * lambda_
@@ -32,7 +41,7 @@ def _lqra(X, y, quantile: float, lambda_: float = 0.0, fit_intercept: bool = Fal
     b_eq = y
     A_eq = np.concatenate([X, -X, np.eye(N), -np.eye(N)], axis=1)
 
-    optimize_result = scipy_linprog(
+    optimize_result = linprog(
         c=c,
         A_eq=A_eq,
         b_eq=b_eq,
@@ -49,8 +58,7 @@ def _sqra(X, y, quantile: float, H: float, fit_intercept=False):
     # for now, TNC (non-linear) minimizer is used
 
     if fit_intercept:
-        N = X.shape[0]
-        X = np.concatenate([np.ones((N, 1)), X], axis=1)
+        X = _add_intercept(X)
 
     qra = QRA(quantile=quantile, fit_intercept=False).fit(X, y)
     beta__initial_guess = qra._beta
@@ -71,7 +79,78 @@ def _sqra(X, y, quantile: float, H: float, fit_intercept=False):
     return minimize(rho, beta__initial_guess, method="TNC").x
 
 
-class QRA:
+class _LinearModel:
+    """Common abstract class for all linear models."""
+
+    def __init__(self, fit_intercept: bool = False) -> None:
+        """Initialize linear model.
+
+        :param fit_intercept: True if fit intercept in model, defaults to False
+        :type fit_intercept: bool, optional
+        """
+        self.fit_intercept = fit_intercept
+
+    def fit(self, X: np.array, y: np.array) -> "_LinearModel":
+        """Fit model.
+
+        :param X: input matrix
+        :type X: np.array
+        :param y: dependent variable
+        :type y: np.array
+        :return: fitted model
+        :rtype: _LinearModel
+        """
+        return self
+
+    def predict(self, X: np.array) -> np.array:
+        """Predict dependent variable.
+
+        :param X: input matrix
+        :type X: np.array
+        :return: prediction
+        :rtype: np.array
+        """
+        return X @ self._coef + self._intercept
+
+    def _assign_coef_and_intercept(self, beta: np.array):
+        self._beta = beta
+        if self.fit_intercept:
+            self._coef = beta[1:]
+            self._intercept = beta[0]
+        else:
+            self._coef = beta
+            self._intercept = 0
+
+
+class _LSTSQ(_LinearModel):
+    """Linear regression (least squares) model."""
+
+    def __init__(self, fit_intercept: bool = False) -> None:
+        """Initialize LSTSQ model.
+
+        :param fit_intercept: True if fit intercept in model, defaults to False
+        :type fit_intercept: bool, optional
+        """
+        super().__init__(fit_intercept)
+
+    def fit(self, X: np.array, y: np.array):
+        """Fit model.
+
+        :param X: input matrix
+        :type X: np.array
+        :param y: dependent variable
+        :type y: np.array
+        :return: fitted model
+        :rtype: _LSTSQ
+        """
+        if self.fit_intercept:
+            X = _add_intercept(X)
+        lstsq_beta, _, _, _ = lstsq(X, y, rcond=-1)
+        self._assign_coef_and_intercept(lstsq_beta)
+        return self
+
+
+class QRA(_LinearModel):
     """QRA."""
 
     def __init__(self, quantile: float, fit_intercept: bool = False) -> None:
@@ -83,9 +162,9 @@ class QRA:
         :type fit_intercept: bool, optional
         """
         self.quantile = quantile
-        self.fit_intercept = fit_intercept
+        super().__init__(fit_intercept)
 
-    def fit(self, X: np.array, y: np.array) -> "QRA":
+    def fit(self, X: np.array, y: np.array):
         """Fit model.
 
         :param X: input matrix
@@ -98,25 +177,6 @@ class QRA:
         beta = _lqra(X, y, self.quantile, 0, self.fit_intercept)
         self._assign_coef_and_intercept(beta)
         return self
-
-    def _assign_coef_and_intercept(self, beta: np.array):
-        self._beta = beta
-        if self.fit_intercept:
-            self._coef = beta[1:]
-            self._intercept = beta[0]
-        else:
-            self._coef = beta
-            self._intercept = 0
-
-    def predict(self, X: np.array) -> np.array:
-        """Predict dependent variable.
-
-        :param X: input matrix
-        :type X: np.array
-        :return: prediction
-        :rtype: np.array
-        """
-        return X @ self._coef + self._intercept
 
 
 class QRM(QRA):
@@ -132,7 +192,7 @@ class QRM(QRA):
         """
         super().__init__(quantile=quantile, fit_intercept=fit_intercept)
 
-    def fit(self, X: np.array, y: np.array) -> "QRM":
+    def fit(self, X: np.array, y: np.array):
         """Fit model.
 
         :param X: input matrix
@@ -157,6 +217,145 @@ class QRM(QRA):
         return super().predict(X)
 
 
+class FQRA:
+    """FQRA."""
+
+    def __init__(
+        self, quantile: float, n_factors: int, fit_intercept: bool = False
+    ) -> None:
+        """Initialize FQRA model.
+
+        :param quantile: quantile
+        :type quantile: float
+        :param n_factors: number of factors (principal components) used
+        :type n_factors: int
+        :param fit_intercept: True if fit intercept in model, defaults to False
+        :type fit_intercept: bool, optional
+        """
+        self.quantile = quantile
+        self.n_factors = n_factors
+        self.fit_intercept = fit_intercept
+
+    def fit(self, X: np.array, y: np.array):
+        """Fit model.
+
+        :param X: input matrix
+        :type X: np.array
+        :param y: dependent variable
+        :type y: np.array
+        :return: fitted model
+        :rtype: FQRA
+        """
+        self._X_train = X
+        self._y_train = y
+        return self
+
+    def predict(self, X: np.array) -> np.array:
+        """Predict dependent variable.
+
+        :param X: input matrix
+        :type X: np.array
+        :return: prediction
+        :rtype: np.array
+        """
+        X_train_f, X_test_f = self._get_factors(X)
+
+        if self.n_factors is None:
+            self.n_factors = self._select_best_n_factors_with_bic(
+                X_train_f,
+                QRA(self.quantile, self.fit_intercept),
+            )
+
+        X_train_f = X_train_f[:, : self.n_factors]
+        X_test_f = X_test_f[:, : self.n_factors]
+        qra = QRA(self.quantile, self.fit_intercept).fit(X_train_f, self._y_train)
+        return qra.predict(X_test_f)
+
+    def _get_factors(self, X: np.array) -> Tuple[np.array, np.array]:
+        X_full = np.concatenate([self._X_train, X], axis=0)
+        _, _, Vh = np.linalg.svd(X_full, full_matrices=False)
+        F = (X_full @ Vh.T) / X.shape[1]
+        return F[: self._X_train.shape[0], :], F[self._X_train.shape[0] :, :]
+
+    def _select_best_n_factors_with_bic(
+        self,
+        X_train_f: np.array,
+        model: _LinearModel,
+    ) -> int:
+        last_bic = np.inf
+        best_n_factors = 0
+        N, K = X_train_f.shape
+
+        for i in range(1, K + 1):
+            model = model.fit(X_train_f[:, :i], self._y_train)
+            y_hat_train = model.predict(X_train_f[:, :i])
+            rss = np.sum(np.square(self._y_train - y_hat_train))
+            bic = N * np.log(rss / N) + i * np.log(N)
+            if bic > last_bic:
+                break
+            last_bic = bic
+            best_n_factors = i
+        return best_n_factors
+
+
+class FQRM(FQRA):
+    """FQRM."""
+
+    def __init__(
+        self, quantile: float, n_factors: int, fit_intercept: bool = False
+    ) -> None:
+        """Initialize FQRA model.
+
+        :param quantile: quantile
+        :type quantile: float
+        :param n_factors: number of factors (principal components) used
+        :type n_factors: int
+        :param fit_intercept: True if fit intercept in model, defaults to False
+        :type fit_intercept: bool, optional
+        """
+        super().__init__(quantile, n_factors, fit_intercept)
+
+    def fit(self, X: np.array, y: np.array):
+        """Fit model.
+
+        :param X: input matrix
+        :type X: np.array
+        :param y: dependent variable
+        :type y: np.array
+        :return: fitted model
+        :rtype: FQRM
+        """
+        return super().fit(X, y)
+
+    def predict(self, X: np.array) -> np.array:
+        """Predict dependent variable.
+
+        :param X: input matrix
+        :type X: np.array
+        :return: prediction
+        :rtype: np.array
+        """
+        X_train_f, X_test_f = self._get_factors(X)
+
+        if self.n_factors is None:
+            self.n_factors = self._select_best_n_factors_with_bic(
+                X_train_f,
+                _LSTSQ(self.fit_intercept),
+            )
+
+        X_train_f = X_train_f[:, : self.n_factors]
+        X_test_f = X_test_f[:, : self.n_factors]
+
+        lstsq = _LSTSQ(self.fit_intercept).fit(X_train_f, self._y_train)
+        X_train_fm = lstsq.predict(X_train_f)
+        X_train_fm = np.expand_dims(X_train_fm, axis=1)
+        X_test_fm = lstsq.predict(X_test_f)
+        X_test_fm = np.expand_dims(X_test_fm, axis=1)
+
+        qra = QRA(self.quantile, self.fit_intercept).fit(X_train_fm, self._y_train)
+        return qra.predict(X_test_fm)
+
+
 class LQRA(QRA):
     """LQRA."""
 
@@ -178,7 +377,7 @@ class LQRA(QRA):
         super().__init__(quantile=quantile, fit_intercept=fit_intercept)
         self.lambda_ = lambda_
 
-    def fit(self, X: np.array, y: np.array) -> "LQRA":
+    def fit(self, X: np.array, y: np.array):
         """Fit model.
 
         :param X: input matrix
@@ -216,7 +415,7 @@ class SQRA(QRA):
         super().__init__(quantile=quantile, fit_intercept=fit_intercept)
         self.H = H
 
-    def fit(self, X: np.array, y: np.array) -> "SQRA":
+    def fit(self, X: np.array, y: np.array):
         """Fit model.
 
         :param X: input matrix
@@ -251,7 +450,7 @@ class SQRM(SQRA):
         """
         super().__init__(quantile=quantile, H=H, fit_intercept=fit_intercept)
 
-    def fit(self, X: np.array, y: np.array) -> "SQRM":
+    def fit(self, X: np.array, y: np.array):
         """Fit model.
 
         :param X: input matrix
