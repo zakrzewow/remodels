@@ -30,8 +30,11 @@ class LogClippingScaler(BaseScaler):
         self.k = k
           
     def _transform_data(self, data):
-        condition = data.abs() > self.k
-        return np.where(condition, np.sign(data) * (np.log(data.abs() - 2) + 3), data)
+        abs_data = data.abs()
+        condition = (abs_data > self.k) & (abs_data > 2)
+        
+        log_values = np.sign(data) * (np.log(abs_data - 2) + 3)
+        return np.where(condition, log_values, data)
 
     def transform(self, X, y=None):
         X_transformed = self._transform_data(X)
@@ -47,7 +50,30 @@ class LogClippingScaler(BaseScaler):
         condition = data.abs() > self.k
         return np.where(condition, np.sign(data) * (np.exp(data.abs() - 3) + 2), data)
 
-    
+
+class LogisticScaler(BaseScaler):
+    def __init__(self):
+        pass  # No parameters for now, but the structure is in place for future changes
+
+    def _transform_data(self, data):
+        return (1 + np.exp(-data)) ** (-1)
+
+    def _inverse_transform_data(self, data):
+        return np.log(data / (1 - data))
+
+    def transform(self, X, y=None):
+        X_transformed = self._transform_data(X)
+        y_transformed = self._transform_data(y) if y is not None else None
+        
+        return self._to_dataframe(X, X_transformed), self._to_dataframe(y, y_transformed) if y is not None else None
+
+    def inverse_transform(self, X, y=None):
+        X_inverted = self._inverse_transform_data(X)
+        y_inverted = self._inverse_transform_data(y) if y is not None else None
+        
+        return self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted) if y is not None else None
+
+
 class ArcsinhScaler(BaseScaler):
 
     def _transform_data(self, data):
