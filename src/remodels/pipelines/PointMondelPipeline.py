@@ -1,22 +1,7 @@
-from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 import pandas as pd
 
-class BaseScaler(BaseEstimator, TransformerMixin):
-    def fit(self, X, y=None):
-        return self
-
-    def fit_transform(self, X, y=None):
-        self.fit(X, y)
-        return self.transform(X, y)
-    
-    def _to_dataframe(self, original, transformed):
-        if isinstance(original, pd.DataFrame):
-            return pd.DataFrame(transformed, index=original.index, columns=original.columns)
-        else:
-            return transformed  
-
-class MyPipeline(Pipeline):
+class PointModelPipeline(Pipeline):
     def _process_step(self, step, Xt, yt, **fit_params):
         if yt is not None:
             step.fit(Xt, yt, **fit_params)
