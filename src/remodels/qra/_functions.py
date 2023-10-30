@@ -1,6 +1,7 @@
 """QRA-computing helper functions."""
 
 import numpy as np
+from scipy import sparse
 from scipy.optimize import linprog
 from scipy.optimize import minimize
 from scipy.stats import iqr
@@ -36,7 +37,10 @@ def _lqra(X, y, quantile: float, lambda_: float = 0.0, fit_intercept: bool = Fal
         c[K] = 0
 
     b_eq = y
-    A_eq = np.concatenate([X, -X, np.eye(N), -np.eye(N)], axis=1)
+    # A_eq = np.concatenate([X, -X, np.eye(N), -np.eye(N)], axis=1)
+
+    eye = sparse.eye(N, dtype=X.dtype, format="csc")
+    A_eq = sparse.hstack([X, -X, eye, -eye], format="csc")
 
     optimize_result = linprog(
         c=c,
