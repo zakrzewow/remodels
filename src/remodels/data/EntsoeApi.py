@@ -46,7 +46,7 @@ class EntsoeApi:
         self.namespace = {"ns": "urn:iec62325.351:tc57wg16:451-6:generationloaddocument:3:0"}
         self.logger = logging.getLogger(__name__)
 
-    def _make_request(self, start_date: dt.date, end_date: dt.date, params: dict, data_parser) -> pd.DataFrame:
+    def _make_request(self, start_date: dt.date, end_date: dt.date, params: dict, data_parser, resolution_preference=None) -> pd.DataFrame:
         """
         Makes a request to the API and retrieves the data.
 
@@ -54,6 +54,7 @@ class EntsoeApi:
         :param end_date: The end date for the data retrieval.
         :param params: The parameters for the API request.
         :param data_parser: The parser function for the API response.
+        :param resolution_preference: Optional resolution preference for the data parser.
 
         :return: A DataFrame containing the retrieved data.
         """
@@ -70,7 +71,11 @@ class EntsoeApi:
             try:
                 response = requests.get(self.base_url, params=params)
                 response.raise_for_status()
-                data += data_parser(response.content)
+                # Check if data_parser expects a resolution preference
+                if resolution_preference is not None:
+                    data += data_parser(response.content, resolution_preference)
+                else:
+                    data += data_parser(response.content)
                 current_date = next_date + dt.timedelta(days=1)
             except requests.HTTPError as e:
                 self.logger.error(f"Failed to retrieve data: {e}")
@@ -86,44 +91,55 @@ class EntsoeApi:
         data = []
 
         for time_series in root.findall(".//ns:TimeSeries", self.namespace):
-            interval_start = pd.Timestamp(
-                pd.Timestamp(time_series.find(".//ns:Period/ns:timeInterval/ns:start", self.namespace).text)
-            )
+            interval_start = pd.Timestamp(time_series.find(".//ns:Period/ns:timeInterval/ns:start", self.namespace).text)
 
-            resolution = dt.timedelta(
-                minutes=int(time_series.find(".//ns:Period/ns:resolution", self.namespace).text[2:-1])
-            )
+            # Get the resolution period from the XML, convert it to a timedelta object
+            resolution_period = time_series.find(".//ns:Period/ns:resolution", self.namespace).text
+            resolution_minutes = int(resolution_period[2:-1])  # Assuming format is like 'PT15M' or 'PT60M'
+            resolution = dt.timedelta(minutes=resolution_minutes)
 
             psr_type_elem = time_series.find(".//ns:psrType", self.namespace)
             psr_type = psr_type_elem.text if psr_type_elem is not None else None
 
             for point in time_series.findall(".//ns:Point", self.namespace):
                 position = int(point.find("ns:position", self.namespace).text)
-                datetime_position = interval_start + pd.Timedelta(hours=position-1)  # Modified this line
+                # Adjusted to consider the resolution for calculating datetime_position
+                datetime_position = interval_start + (resolution * (position - 1))
                 quantity = float(point.find("ns:quantity", self.namespace).text)
 
                 data_point = {"datetime": datetime_position, "quantity": quantity}
                 if psr_type is not None:
                     data_point["PSRType"] = psr_type
-
                 data.append(data_point)
+
         return data
 
-    def _parse_pricing_data(self, content):
+    def _parse_pricing_data(self, content, resolution_preference=None):
         root = ET.fromstring(content)
         data = []
         
-        # Extract data
-        data = []
+        # Define the namespace
         namespace = {'ns': 'urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0'}
+        
+        # Extract data
         for period in root.findall('.//ns:Period', namespaces=namespace):
+            # Find the resolution of the period and parse it
+            resolution_text = period.find('ns:resolution', namespaces=namespace).text
+            resolution_minutes = int(resolution_text[2:-1])  # Assuming format is 'PT15M' or 'PT60M'
+            resolution_timedelta = dt.timedelta(minutes=resolution_minutes)
+            
+            # Skip periods that do not match the resolution preference
+            if resolution_preference and resolution_minutes != resolution_preference:
+                continue
+            
             time_interval = period.find('ns:timeInterval', namespaces=namespace)
             start_time = pd.Timestamp(time_interval.find('ns:start', namespaces=namespace).text)
-
+            
             for point in period.findall('ns:Point', namespaces=namespace):
                 position = int(point.find('ns:position', namespaces=namespace).text)
                 price_amount = float(point.find('ns:price.amount', namespaces=namespace).text)
-                exact_time = start_time + dt.timedelta(hours=position - 1)
+                # Adjust the time calculation based on the resolution
+                exact_time = start_time + resolution_timedelta * (position - 1)
                 data.append({
                     'price_da': price_amount, 
                     'datetime': exact_time
@@ -151,7 +167,7 @@ class EntsoeApi:
         }
         return self._make_request(start_date, end_date, params, self._parse_production_and_load_data)
 
-    def get_day_ahead_pricing(self, start_date, end_date, in_domain):
+    def get_day_ahead_pricing(self, start_date, end_date, in_domain, resolution_preference=None):
         params = {
             "securityToken": self.security_token,
             "documentType": "A44",
@@ -159,8 +175,8 @@ class EntsoeApi:
             "in_Domain": in_domain,
             "out_Domain": in_domain
         }
-        return self._make_request(start_date, end_date, params, self._parse_pricing_data)
-    
+        return self._make_request(start_date, end_date, params, self._parse_pricing_data, resolution_preference)
+
     def get_forecast_load(self, start_date, end_date, out_domain):
         params = {
             "securityToken": self.security_token,
