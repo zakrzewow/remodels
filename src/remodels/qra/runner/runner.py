@@ -2,8 +2,10 @@
 
 import concurrent.futures
 from itertools import repeat
+from typing import Callable
 
 import numpy as np
+from scipy.stats import chi2
 
 from remodels.qra import QRA
 
@@ -55,7 +57,6 @@ class Runner:
         """
         executor = concurrent.futures.ProcessPoolExecutor(self.max_workers)
 
-        self.prediction_window = 10
         Y_pred = np.zeros((X.shape[0] - self.calibration_window, 99), np.float_)
 
         for i in range(
@@ -131,10 +132,10 @@ class _Results:
         :rtype: np.array
         """
         hits = self._hits(alpha)
-        d = self.Y_pred.shape[0] // self.prediction_window
-        ec_h = np.zeros(shape=(d,))
-        for i in range(d):
-            ec_h[i] = hits[i :: self.prediction_window].sum() / d
+        ec_h = np.zeros(shape=(self.prediction_window,))
+        for i in range(self.prediction_window):
+            hits_h = hits[i :: self.prediction_window]
+            ec_h[i] = hits_h.sum() / hits_h.shape[0]
         return ec_h
 
     def ec_mad(self, alpha: int) -> float:
@@ -146,6 +147,91 @@ class _Results:
         :rtype: float
         """
         return np.mean(np.abs(self.ec_h(alpha) - alpha / 100))
+
+    def kupiec_test(self, alpha: int, significance_level: float = 0.05) -> int:
+        """Kupiec test.
+
+        :param alpha: length of predition interval
+        :type alpha: int
+        :param significance_level: test significance level, defaults to 0.05
+        :type significance_level: float, optional
+        :return: number of hours that test is not rejected
+        :rtype: int
+        """
+        return self._count_hypothesis_not_rejected(
+            self._kupiec_test_statistic, alpha, significance_level, 1
+        )
+
+    def christoffersen_test(self, alpha: int, significance_level: float = 0.05) -> int:
+        """Christoffersen test.
+
+        :param alpha: length of predition interval
+        :type alpha: int
+        :param significance_level: test significance level, defaults to 0.05
+        :type significance_level: float, optional
+        :return: number of hours that test is not rejected
+        :rtype: int
+        """
+        return self._count_hypothesis_not_rejected(
+            self._christoffersen_test_statistic, alpha, significance_level, 2
+        )
+
+    def _count_hypothesis_not_rejected(
+        self,
+        test_func: Callable[[np.array, float], float],
+        alpha: int,
+        significance_level: float,
+        df: int,
+    ) -> int:
+        alpha_p = alpha / 100
+        hits = self._hits(alpha)
+        hypothesis_not_rejected_counter = 0
+
+        for i in range(self.prediction_window):
+            hits_h = hits[i :: self.prediction_window]
+            test_statistic = test_func(hits_h, alpha_p)
+            is_not_rejected = test_statistic < chi2.ppf(1 - significance_level, df=df)
+            hypothesis_not_rejected_counter += is_not_rejected
+
+        return hypothesis_not_rejected_counter
+
+    def _kupiec_test_statistic(self, hits: np.array, alpha_p: float):
+        n = hits.shape[0]
+        n1 = hits.sum()
+        n0 = n - n1
+        L_0 = n1 * np.log(alpha_p) + n0 * np.log(1 - alpha_p)
+        L_A = n1 * np.log(n1 / n) + n0 * np.log(n0 / n)
+        return 2 * (L_A - L_0)
+
+    def _christoffersen_test_statistic(self, hits: np.array, alpha_p: float):
+        t00 = (~hits & ~self.__shift_arr(hits, -1)).sum()
+        t01 = (~hits & self.__shift_arr(hits, -1)).sum()
+        t10 = (hits & ~self.__shift_arr(hits, -1)).sum()
+        t11 = (hits & self.__shift_arr(hits, -1)).sum()
+
+        p01 = t01 / (t00 + t01)
+        p11 = t11 / (t11 + t10)
+        L_A = (
+            t00 * np.log(1 - p01)
+            + t01 * np.log(p01)
+            + t10 * np.log(1 - p11)
+            + t11 * np.log(p11)
+        )
+        L_0 = (t00 + t10) * np.log(1 - alpha_p) + (t01 + t11) * np.log(alpha_p)
+        return 2 * (L_A - L_0)
+
+    @staticmethod
+    def __shift_arr(arr, num, fill_value=np.nan):
+        result = np.empty_like(arr)
+        if num > 0:
+            result[:num] = fill_value
+            result[num:] = arr[:-num]
+        elif num < 0:
+            result[num:] = fill_value
+            result[:num] = arr[-num:]
+        else:
+            result[:] = arr
+        return result
 
     def _hits(self, alpha) -> np.array:
         lower_bound = 49 - alpha // 2
