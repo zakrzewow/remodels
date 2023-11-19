@@ -41,7 +41,7 @@ class MLogScaler(BaseScaler):
         X_transformed = self._transform_data(X)
         return (X_transformed, self._transform_data(y)) if y is not None else X_transformed
 
-    def inverse_transform(self, X, y=None):
+    def inverse_transform(self, X=None, y=None):
         """
         Inverse transform the features and optionally the target.
 
@@ -55,5 +55,6 @@ class MLogScaler(BaseScaler):
         def invert(data):
             return np.sign(data) * (np.exp(np.abs(data) - np.log(self.c)) - 1 / self.c)
 
-        X_inverted = invert(X)
-        return (X_inverted, invert(y)) if y is not None else X_inverted
+        X_inverted = invert(X) if X is not None else None
+        y_inverted = invert(y) if y is not None else None
+        return (self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted))

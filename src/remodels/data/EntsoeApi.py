@@ -17,7 +17,6 @@ class EntsoeApi:
         """
         self.base_url = "https://web-api.tp.entsoe.eu/api"
         self.security_token = security_token
-        self.namespace = {"ns": "urn:iec62325.351:tc57wg16:451-6:generationloaddocument:3:0"}
         self.logger = logging.getLogger(__name__)
 
     def _make_request(self, start_date: dt.date, end_date: dt.date, params: dict, data_parser, resolution_preference=None) -> pd.DataFrame:
@@ -70,26 +69,27 @@ class EntsoeApi:
         :return: List of dictionaries containing production and load data.
         :rtype: list
         """
+        load_namespace = {"ns": "urn:iec62325.351:tc57wg16:451-6:generationloaddocument:3:0"}
         root = ET.fromstring(content)
         data = []
 
-        for time_series in root.findall(".//ns:TimeSeries", self.namespace):
+        for time_series in root.findall(".//ns:TimeSeries", load_namespace):
             # Parse and calculate the starting interval.
-            interval_start = pd.Timestamp(time_series.find(".//ns:Period/ns:timeInterval/ns:start", self.namespace).text)
+            interval_start = pd.Timestamp(time_series.find(".//ns:Period/ns:timeInterval/ns:start", load_namespace).text)
             # Calculate the resolution in minutes.
-            resolution_period = time_series.find(".//ns:Period/ns:resolution", self.namespace).text
+            resolution_period = time_series.find(".//ns:Period/ns:resolution", load_namespace).text
             resolution_minutes = int(resolution_period[2:-1])  # Expects format 'PT15M' or 'PT60M'.
             resolution = dt.timedelta(minutes=resolution_minutes)
 
             # Extract the PSR type.
-            psr_type_elem = time_series.find(".//ns:psrType", self.namespace)
+            psr_type_elem = time_series.find(".//ns:psrType", load_namespace)
             psr_type = psr_type_elem.text if psr_type_elem is not None else None
 
             # Process each point in the time series.
-            for point in time_series.findall(".//ns:Point", self.namespace):
-                position = int(point.find("ns:position", self.namespace).text)
+            for point in time_series.findall(".//ns:Point", load_namespace):
+                position = int(point.find("ns:position", load_namespace).text)
                 datetime_position = interval_start + (resolution * (position - 1))
-                quantity = float(point.find("ns:quantity", self.namespace).text)
+                quantity = float(point.find("ns:quantity", load_namespace).text)
 
                 data_point = {"datetime": datetime_position, "quantity": quantity}
                 if psr_type:
@@ -111,10 +111,11 @@ class EntsoeApi:
         """
         root = ET.fromstring(content)
         data = []
+        pricing_namespace = {"ns": "urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0"}
         
         # Extract and process data for each period.
-        for period in root.findall('.//ns:Period', namespaces=self.namespace):
-            resolution_text = period.find('ns:resolution', namespaces=self.namespace).text
+        for period in root.findall('.//ns:Period', namespaces=pricing_namespace):
+            resolution_text = period.find('ns:resolution', namespaces=pricing_namespace).text
             resolution_minutes = int(resolution_text[2:-1])  # Expects format 'PT15M' or 'PT60M'.
             resolution_timedelta = dt.timedelta(minutes=resolution_minutes)
             
@@ -122,12 +123,12 @@ class EntsoeApi:
             if resolution_preference and resolution_minutes != resolution_preference:
                 continue
             
-            time_interval = period.find('ns:timeInterval', namespaces=self.namespace)
-            start_time = pd.Timestamp(time_interval.find('ns:start', namespaces=self.namespace).text)
+            time_interval = period.find('ns:timeInterval', namespaces=pricing_namespace)
+            start_time = pd.Timestamp(time_interval.find('ns:start', namespaces=pricing_namespace).text)
             
-            for point in period.findall('ns:Point', namespaces=self.namespace):
-                position = int(point.find('ns:position', namespaces=self.namespace).text)
-                price_amount = float(point.find('ns:price.amount', namespaces=self.namespace).text)
+            for point in period.findall('ns:Point', namespaces=pricing_namespace):
+                position = int(point.find('ns:position', namespaces=pricing_namespace).text)
+                price_amount = float(point.find('ns:price.amount', namespaces=pricing_namespace).text)
                 exact_time = start_time + resolution_timedelta * (position - 1)
                 data.append({
                     'price_da': price_amount, 

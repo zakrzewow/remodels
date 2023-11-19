@@ -77,4 +77,4 @@ class ClippingScaler(BaseScaler):
         """
         X_inverted = np.clip(X, -self.k, self.k) if X is not None else None
         y_inverted = np.clip(y, -self.k, self.k) if y is not None else None
-        return self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted) if y is not None else self._to_dataframe(X, X_inverted)
+        return (self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted))

@@ -46,7 +46,7 @@ class LogClippingScaler(BaseScaler):
         return (self._to_dataframe(X, X_transformed), self._to_dataframe(y, y_transformed)) if y is not None else self._to_dataframe(X, X_transformed)
         
 
-    def inverse_transform(self, X, y=None):
+    def inverse_transform(self, X=None, y=None):
         """
         Apply the inverse log clipping transformation to the features and optionally the target.
         
@@ -61,7 +61,7 @@ class LogClippingScaler(BaseScaler):
                                      data)
             return data_inverted
         
-        X_inverted = invert(X)
+        X_inverted = invert(X) if X is not None else None
         y_inverted = invert(y) if y is not None else None
-        return self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted) if y is not None else self._to_dataframe(X, X_inverted)
+        return (self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted))
 

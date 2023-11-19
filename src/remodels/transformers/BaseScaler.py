@@ -47,5 +47,22 @@ class BaseScaler(BaseEstimator, TransformerMixin):
         else:
             return transformed
         
+    def fit_transform(self, X, y=None):
+        """
+        Fit to data, then transform it.
+
+        :param X: Features to fit and transform.
+        :type X: np.ndarray
+        :param y: Optional target to fit and transform.
+        :type y: np.ndarray, optional
+        :return: Transformed features and optionally transformed target.
+        :rtype: tuple or np.ndarray
+        """
+        # Call the fit method (even if it does nothing in this case)
+        self.fit(X, y)
+
+        # Call the transform method and return its result
+        return self.transform(X, y)
+            
 
     

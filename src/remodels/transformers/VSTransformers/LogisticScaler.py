@@ -19,7 +19,7 @@ class LogisticScaler(BaseScaler):
         y_transformed = (1 + np.exp(-y)) ** (-1) if y is not None else None
         return (X_transformed, y_transformed) if y is not None else X_transformed
 
-    def inverse_transform(self, X, y=None):
+    def inverse_transform(self, X = None, y=None):
         """
         Apply the inverse logistic transformation to the features and optionally the target.
         
@@ -30,6 +30,6 @@ class LogisticScaler(BaseScaler):
         def invert(data):
             return np.log(data / (1 - data))
         
-        X_inverted = invert(X)
+        X_inverted = invert(X) if X is not None else None
         y_inverted = invert(y) if y is not None else None
-        return (X_inverted, y_inverted) if y is not None else X_inverted
+        return (X_inverted, y_inverted)

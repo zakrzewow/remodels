@@ -62,7 +62,7 @@ class RePipeline(Pipeline):
         # Fit and transform the last step.
         final_step = self.steps[-1][1]
         if hasattr(final_step, 'fit_transform'):
-            return final_step.fit_transform(Xt, yt, **fit_params) if yt is not None else final_step.fit_transform(Xt, **fit_params)
+            return final_step.fit_transform(Xt, yt, **fit_params) if yt is not None else (final_step.fit_transform(Xt, **fit_params), None)
         else:
             final_step.fit(Xt, yt, **fit_params)
             return final_step.transform(Xt, yt) if yt is not None else final_step.transform(Xt)
@@ -83,7 +83,7 @@ class RePipeline(Pipeline):
         # Transform the last step.
         return self.steps[-1][1].transform(Xt, yt)
 
-    def inverse_transform(self, Xt, yt=None):
+    def inverse_transform(self, Xt=None, yt=None):
         """
         Apply inverse transformations in reverse order of the data.
 

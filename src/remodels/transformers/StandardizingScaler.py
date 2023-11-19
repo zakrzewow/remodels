@@ -79,6 +79,11 @@ class StandardizingScaler(BaseScaler):
             return func(data)
         return np.array([func(data[:, i]) for i in range(data.shape[1])]).T
 
+    def _apply_transform(self, data, centers, scales):
+        if len(data.shape) == 1:
+            return (data - centers) / scales
+        return (data - centers.reshape(1, -1)) / scales.reshape(1, -1)
+
     def transform(self, X, y=None):
         """
         Transform the features X and optionally the target y using the fitted scaler.
@@ -94,7 +99,7 @@ class StandardizingScaler(BaseScaler):
         if y is None:
             return X_transformed
         y_transformed = (np.array(y) - self.y_center) / self.y_scale
-        return X_transformed, y_transformed
+        return X_transformed, self._to_dataframe(y, y_transformed)
         
     def inverse_transform(self, X=None, y=None):
         """
@@ -113,4 +118,4 @@ class StandardizingScaler(BaseScaler):
         if y is not None:
             y_inverted = (np.array(y) * self.y_scale) + self.y_center
 
-        return X_inverted, y_inverted
+        return  (self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted))

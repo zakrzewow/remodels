@@ -27,6 +27,6 @@ class ArcsinhScaler(BaseScaler):
         :param y: Transformed target to inverse transform.
         :return: Inverse transformed features and optionally inverse transformed target.
         """
-        X_inverted = np.sinh(X)
+        X_inverted = np.sinh(X) if X is not None else None
         y_inverted = np.sinh(y) if y is not None else None
-        return (X_inverted, y_inverted) if y is not None else X_inverted
+        return (X_inverted, y_inverted)

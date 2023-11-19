@@ -54,5 +54,6 @@ class BoxCoxScaler(BaseScaler):
         def invert(data):
             return np.sign(data) * ((self.lamb * np.abs(data) + 1)**(1 / self.lamb) - 1) if self.lamb != 0 else np.exp(np.abs(data)) - 1
 
-        X_inverted = invert(X)
-        return (X_inverted, invert(y)) if y is not None else X_inverted
+        X_inverted = invert(X) if X is not None else None
+        y_inverted = invert(y) if y is not None else None
+        return (X_inverted, y_inverted)
