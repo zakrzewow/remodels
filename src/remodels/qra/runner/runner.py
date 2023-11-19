@@ -195,7 +195,7 @@ class _Results:
 
         return hypothesis_not_rejected_counter
 
-    def _kupiec_test_statistic(self, hits: np.array, alpha_p: float):
+    def _kupiec_test_statistic(self, hits: np.array, alpha_p: float) -> float:
         n = hits.shape[0]
         n1 = hits.sum()
         n0 = n - n1
@@ -203,7 +203,7 @@ class _Results:
         L_A = n1 * np.log(n1 / n) + n0 * np.log(n0 / n)
         return 2 * (L_A - L_0)
 
-    def _christoffersen_test_statistic(self, hits: np.array, alpha_p: float):
+    def _christoffersen_test_statistic(self, hits: np.array, alpha_p: float) -> float:
         t00 = (~hits & ~self.__shift_arr(hits, -1)).sum()
         t01 = (~hits & self.__shift_arr(hits, -1)).sum()
         t10 = (hits & ~self.__shift_arr(hits, -1)).sum()

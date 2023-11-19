@@ -24,7 +24,7 @@ class FQRA(QRA):
         :type fit_intercept: bool, optional
         """
         super().__init__(quantile, fit_intercept)
-        self.fit_intercept = fit_intercept
+        self.n_factors = n_factors
 
     def fit(self, X: np.array, y: np.array):
         """Fit model.
