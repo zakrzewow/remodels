@@ -9,4 +9,6 @@
 /src/*.egg-info/
 __pycache__/
 *.ipynb
+!usage.ipynb
 *.pkl
+*.csv

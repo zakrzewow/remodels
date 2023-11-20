@@ -1,7 +1,9 @@
-"""BaseScaler"""
+"""BaseScaler."""
 
-from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
+from sklearn.base import BaseEstimator
+from sklearn.base import TransformerMixin
+
 
 class BaseScaler(BaseEstimator, TransformerMixin):
     """Custom scaler base class following scikit-learn's conventions."""
@@ -43,13 +45,14 @@ class BaseScaler(BaseEstimator, TransformerMixin):
         :rtype: DataFrame or array-like
         """
         if isinstance(original, pd.DataFrame):
-            return pd.DataFrame(transformed, index=original.index, columns=original.columns)
+            return pd.DataFrame(
+                transformed, index=original.index, columns=original.columns
+            )
         else:
             return transformed
-        
+
     def fit_transform(self, X, y=None):
-        """
-        Fit to data, then transform it.
+        """Fit to data, then transform it.
 
         :param X: Features to fit and transform.
         :type X: np.ndarray
@@ -63,6 +66,3 @@ class BaseScaler(BaseEstimator, TransformerMixin):
 
         # Call the transform method and return its result
         return self.transform(X, y)
-            
-
-    
