@@ -10,7 +10,7 @@ class sFQRM(FQRM, sFQRA):
     """sFQRM."""
 
     def __init__(
-        self, quantile: float, n_factors: int = None, fit_intercept: bool = False
+        self, quantile: float = None, n_factors: int = None, fit_intercept: bool = False
     ) -> None:
         """Initialize sFQRM model.
 

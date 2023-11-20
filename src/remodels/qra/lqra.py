@@ -11,7 +11,7 @@ class LQRA(QRA):
 
     def __init__(
         self,
-        quantile: float,
+        quantile: float = 0.5,
         lambda_: float = 0.0,
         fit_intercept: bool = False,
     ) -> None:

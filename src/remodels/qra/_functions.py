@@ -14,7 +14,9 @@ def _add_intercept(X: np.array) -> np.array:
     return new_X
 
 
-def _lqra(X, y, quantile: float, lambda_: float = 0.0, fit_intercept: bool = False):
+def _lqra(
+    X, y, quantile: float = 0.5, lambda_: float = 0.0, fit_intercept: bool = False
+):
     # input matrix X - N rows x K columns
     N, K = X.shape
 
@@ -54,7 +56,7 @@ def _lqra(X, y, quantile: float, lambda_: float = 0.0, fit_intercept: bool = Fal
     return beta
 
 
-def _sqra(X, y, quantile: float, H: float, fit_intercept=False):
+def _sqra(X, y, quantile: float = 0.5, H: float = None, fit_intercept=False):
     # SQRA can be solved with gradient-descent method (2022-he)
     # for now, TNC (non-linear) minimizer is used
 

@@ -10,10 +10,7 @@ class SQRA(QRA):
     """SQRA."""
 
     def __init__(
-        self,
-        quantile: float,
-        H: float = None,
-        fit_intercept: bool = False,
+        self, quantile: float = 0.5, H: float = None, fit_intercept: bool = False
     ) -> None:
         """Initialize SQRA model.
 

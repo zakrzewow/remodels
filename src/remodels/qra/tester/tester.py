@@ -1,4 +1,4 @@
-"""*QR* runner."""
+"""*QR* tester."""
 
 import concurrent.futures
 from itertools import repeat
@@ -16,33 +16,33 @@ def _process(X_train, y_train, X_test, q, qra_model):
     return q, y_test
 
 
-_default_qra_model = QRA(fit_intercept=True)
+_default_qr_model = QRA(fit_intercept=True)
 
 
-class Runner:
-    """Runner."""
+class QR_Tester:
+    """QR Tester."""
 
     def __init__(
         self,
         calibration_window: int = 14,
         prediction_window: int = 1,
-        qra_model=_default_qra_model,
+        qr_model=_default_qr_model,
         max_workers: int = None,
     ) -> None:
-        """Init runner.
+        """Init tester.
 
         :param calibration_window: length of calibration window, defaults to 14
         :type calibration_window: int, optional
         :param prediction_window: length of prediction window, defaults to 1
         :type prediction_window: int, optional
-        :param qra_model: *QR* model, defaults to QRA(fit_intercept=True)
-        :type qra_model: QRA, optional
+        :param qr_model: *QR* model, defaults to QRA(fit_intercept=True)
+        :type qr_model: QRA, optional
         :param max_workers: process pool executor max workers, defaults to None
         :type max_workers: int, optional
         """
         self.calibration_window = calibration_window
         self.prediction_window = prediction_window
-        self.qra_model = qra_model
+        self.qr_model = qr_model
         self.max_workers = max_workers
 
     def fit_predict(self, X: np.array, y: np.array) -> "_Results":
@@ -79,7 +79,7 @@ class Runner:
                 repeat(y_train),
                 repeat(X_test),
                 range(1, 100),
-                repeat(self.qra_model),
+                repeat(self.qr_model),
             ):
                 Y_pred[i : i + self.prediction_window, q - 1] = y_test
 

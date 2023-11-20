@@ -12,7 +12,7 @@ class FQRA(QRA):
     """FQRA."""
 
     def __init__(
-        self, quantile: float, n_factors: int = None, fit_intercept: bool = False
+        self, quantile: float = 0.5, n_factors: int = None, fit_intercept: bool = False
     ) -> None:
         """Initialize FQRA model.
 
