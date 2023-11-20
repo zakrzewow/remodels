@@ -9,4 +9,3 @@ from .sfqra import sFQRA
 from .sfqrm import sFQRM
 from .sqra import SQRA
 from .sqrm import SQRM
-from .tester.tester import QR_Tester

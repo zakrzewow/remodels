@@ -1,9 +1,11 @@
-"""StandardizingScaler"""
+"""StandardizingScaler."""
 
 import numpy as np
-from scipy.stats import norm
-from remodels.transformers.BaseScaler import BaseScaler
 import pandas as pd
+from scipy.stats import norm
+
+from remodels.transformers.BaseScaler import BaseScaler
+
 
 def mad(x):
     """Compute the Mean Absolute Deviation (MAD) of an array."""
@@ -11,44 +13,42 @@ def mad(x):
     dev = np.abs(x - median)
     return np.mean(dev)
 
+
 class StandardizingScaler(BaseScaler):
     """A custom scaler for standardizing data using either the median or mean method."""
 
-    def __init__(self, method='median'):
-        """
-        Initialize the StandardizingScaler with the chosen method of centering and scaling.
+    def __init__(self, method="median"):
+        """Initialize the StandardizingScaler with the chosen method of centering and scaling.
 
         :param method: Method to use for centering ('median' or 'mean').
         :type method: str
         """
-        if method not in ['median', 'mean']:
+        if method not in ["median", "mean"]:
             raise ValueError("Method must be 'median' or 'mean'")
         self.method = method
         self.x_centers = None
         self.x_scales = None
         self.y_center = None
         self.y_scale = None
-    
+
     def _compute_center_scale(self, data):
-        """
-        Compute the center and scale of the data based on the specified method.
+        """Compute the center and scale of the data based on the specified method.
 
         :param data: The data for which to compute the center and scale.
         :type data: array-like
         :return: A tuple of center and scale.
         :rtype: tuple
         """
-        if self.method == 'median':
+        if self.method == "median":
             center = np.median(data)
             scale = mad(data) / norm.ppf(0.75)
         else:
             center = np.mean(data)
             scale = np.std(data)
         return center, scale
-    
+
     def fit(self, X, y=None):
-        """
-        Fit the scaler to the features X and optionally to the target y.
+        """Fit the scaler to the features X and optionally to the target y.
 
         :param X: Features to fit.
         :type X: array-like
@@ -57,14 +57,15 @@ class StandardizingScaler(BaseScaler):
         :return: The fitted scaler.
         :rtype: StandardizingScaler
         """
-        self.x_centers, self.x_scales = self._vectorize_data(X, self._compute_center_scale)
+        self.x_centers, self.x_scales = self._vectorize_data(
+            X, self._compute_center_scale
+        )
         if y is not None:
             self.y_center, self.y_scale = self._compute_center_scale(np.array(y))
         return self
 
     def _vectorize_data(self, data, func):
-        """
-        Apply a function to each column of the data and return a vector of the results.
+        """Apply a function to each column of the data and return a vector of the results.
 
         :param data: The data to vectorize.
         :type data: array-like
@@ -85,8 +86,7 @@ class StandardizingScaler(BaseScaler):
         return (data - centers.reshape(1, -1)) / scales.reshape(1, -1)
 
     def transform(self, X, y=None):
-        """
-        Transform the features X and optionally the target y using the fitted scaler.
+        """Transform the features X and optionally the target y using the fitted scaler.
 
         :param X: Features to transform.
         :type X: array-like
@@ -100,10 +100,9 @@ class StandardizingScaler(BaseScaler):
             return X_transformed
         y_transformed = (np.array(y) - self.y_center) / self.y_scale
         return X_transformed, self._to_dataframe(y, y_transformed)
-        
+
     def inverse_transform(self, X=None, y=None):
-        """
-        Apply the inverse transformation to the features X and optionally the target y.
+        """Apply the inverse transformation to the features X and optionally the target y.
 
         :param X: Transformed features to inverse transform.
         :type X: array-like, optional
@@ -118,4 +117,4 @@ class StandardizingScaler(BaseScaler):
         if y is not None:
             y_inverted = (np.array(y) * self.y_scale) + self.y_center
 
-        return  (self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted))
+        return (self._to_dataframe(X, X_inverted), self._to_dataframe(y, y_inverted))
