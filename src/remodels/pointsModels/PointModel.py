@@ -26,7 +26,7 @@ class PointModel:
         self.predictions = None  
         self.training_data = None  
 
-    def fit(self, df):
+    def fit(self, df, start, end):
         """
         Fit the model with the training data.
 
@@ -35,6 +35,8 @@ class PointModel:
         """
         self.training_data = df
         self.set_unique_hours(df.index)
+        self.start=start
+        self.end=end
 
     def set_unique_hours(self, dates):
         """
@@ -133,17 +135,13 @@ class PointModel:
                     predictions_list.append((date_, prediction[0,0]))  
                 
 
-    def predict(self, start, end, rolling_window=728, inverse_predictions=True):
+    def predict(self, rolling_window=728, inverse_predictions=True):
         """
         Predict values over a given range, from start to end, using a rolling window, 
         and store/update predictions in the model.
 
         :param df: DataFrame containing the data to be used for prediction.
         :type df: pandas.DataFrame
-        :param start: Start date for prediction.
-        :type start: str or datetime-like
-        :param end: End date for prediction.
-        :type end: str or datetime-like
         :param rolling_window: Number of days to look back for training data.
         :type rolling_window: int
         :param inverse_predictions: Flag to determine whether to apply inverse transformation to predictions.
@@ -153,7 +151,7 @@ class PointModel:
         """
         df = self.training_data
         predictions_list = []
-        for day in pd.date_range(start, end, freq="D"):
+        for day in pd.date_range(self.start, self.end, freq="D"):
             Xy_train = df.loc[(df.index.date >= day.date() - dt.timedelta(days=rolling_window)) & (df.index.date < day.date())][self.all_used_columns + self.y_column].dropna()
             Xy_test = df.loc[df.index.date == day.date()][self.all_used_columns + self.y_column].dropna()
             self.train_and_predict_hours(day, Xy_train, Xy_test, predictions_list, inverse_predictions)
@@ -163,13 +161,13 @@ class PointModel:
         new_predictions_df.set_index('DateTime', inplace=True)
 
         # Update or create the self.predictions DataFrame
-        if self.predictions is not None:
+        if self.predictions is not None and new_predictions_df.columns[0] not in self.predictions.columns:
             # Merge with existing predictions on DateTime index
             self.predictions = self.predictions.join(new_predictions_df, how='outer')
         else:
             self.predictions = new_predictions_df
 
-        return self.predictions
+        return self.predictions[[f'prediction_{rolling_window}rw']]
     
     def calculate_metrics(self, y_true, y_pred):
         """
@@ -196,10 +194,10 @@ class PointModel:
             raise ValueError("Model has not been fitted with training data yet.")
 
         # Align the predictions with the actual values based on the datetime index
-        aligned_df = self.training_data.join(self.predictions, how='inner')
+        aligned_df = self.training_data[self.y_column].join(self.predictions, how='inner')
 
         # Extract the actual and predicted values
-        actual_values = aligned_df[self.y_column]
+        actual_values = aligned_df[self.y_column[0]]
         metrics = {}
         for col in self.predictions.columns:
             if col.startswith('prediction_'):
@@ -208,16 +206,5 @@ class PointModel:
 
         # Convert metrics to DataFrame for easier analysis
         metrics_df = pd.DataFrame(metrics).T
-
-        # Plotting
-        fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(15, 10))
-        axes = axes.flatten()
-        metrics_df.plot(kind='bar', y='MAE', ax=axes[0], title='Mean Absolute Error')
-        metrics_df.plot(kind='bar', y='MSE', ax=axes[1], title='Mean Squared Error')
-        metrics_df.plot(kind='bar', y='RMSE', ax=axes[2], title='Root Mean Squared Error')
-        metrics_df.plot(kind='bar', y='MAPE', ax=axes[3], title='Mean Absolute Percentage Error')
-        metrics_df.plot(kind='bar', y='R2', ax=axes[4], title='R-squared')
-        plt.tight_layout()
-        plt.show()
 
         return metrics_df

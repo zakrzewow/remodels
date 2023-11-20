@@ -7,7 +7,7 @@ class PolyScaler(BaseScaler):
     """
     Scaler that applies a polynomial transformation to the data.
     """
-    def __init__(self, lamb=0.5, c=1):
+    def __init__(self, lamb=0.125, c=0.05):
         """
         Initialize the scaler with parameters for the polynomial transformation.
 
@@ -57,7 +57,7 @@ class PolyScaler(BaseScaler):
         """
         def invert(data):
             c_lamb = (self.c / self.lamb)**(self.lamb / (self.lamb - 1))
-            return np.sign(data) * ((np.abs(data) + c_lamb)**(1 / self.lamb) - c_lamb**(1 / (self.lamb - 1)))
+            return np.sign(data) * ((np.abs(data) + c_lamb)**(1 / self.lamb) - c_lamb**(1 / (self.lamb)))
 
         X_inverted = invert(X) if X is not None else None
         y_inverted = invert(y) if y is not None else None
