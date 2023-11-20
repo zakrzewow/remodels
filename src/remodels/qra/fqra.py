@@ -8,11 +8,11 @@ from ._linear_model import _LinearModel
 from .qra import QRA
 
 
-class FQRA(_LinearModel):
+class FQRA(QRA):
     """FQRA."""
 
     def __init__(
-        self, quantile: float, n_factors: int = None, fit_intercept: bool = False
+        self, quantile: float = 0.5, n_factors: int = None, fit_intercept: bool = False
     ) -> None:
         """Initialize FQRA model.
 
@@ -23,9 +23,8 @@ class FQRA(_LinearModel):
         :param fit_intercept: True if fit intercept in model, defaults to False
         :type fit_intercept: bool, optional
         """
-        self.quantile = quantile
+        super().__init__(quantile, fit_intercept)
         self.n_factors = n_factors
-        self.fit_intercept = fit_intercept
 
     def fit(self, X: np.array, y: np.array):
         """Fit model.

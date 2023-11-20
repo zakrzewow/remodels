@@ -21,40 +21,22 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-## Features
-
-- TODO
-
-## Requirements
-
-- TODO
-
-## Installation
+<!-- ## Installation
 
 You can install _remodels_ via [pip] from [PyPI]:
 
 ```console
 $ pip install remodels
-```
+``` -->
 
 ## Usage
 
-Please see the [Command-line Reference] for details.
-
-## Contributing
-
-Contributions are very welcome.
-To learn more, see the [Contributor Guide].
+Please see the [Usage] for details.
 
 ## License
 
 Distributed under the terms of the [MIT license][license],
 _remodels_ is free and open source software.
-
-## Issues
-
-If you encounter any problems,
-please [file an issue] along with a detailed description.
 
 ## Credits
 
@@ -63,11 +45,9 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 [@cjolowicz]: https://github.com/cjolowicz
 [pypi]: https://pypi.org/
 [hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
-[file an issue]: https://github.com/zakrzewow/remodels/issues
 [pip]: https://pip.pypa.io/
 
 <!-- github-only -->
 
 [license]: https://github.com/zakrzewow/remodels/blob/main/LICENSE
-[contributor guide]: https://github.com/zakrzewow/remodels/blob/main/CONTRIBUTING.md
-[command-line reference]: https://remodels.readthedocs.io/en/latest/usage.html
+[usage]: https://remodels.readthedocs.io/en/latest/usage.html

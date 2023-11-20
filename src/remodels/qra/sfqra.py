@@ -11,7 +11,7 @@ class sFQRA(FQRA):
     """sFQRA."""
 
     def __init__(
-        self, quantile: float, n_factors: int = None, fit_intercept: bool = False
+        self, quantile: float = None, n_factors: int = None, fit_intercept: bool = False
     ) -> None:
         """Initialize sFQRA model.
 

@@ -8,7 +8,7 @@ from .qra import QRA
 class QRM(QRA):
     """QRM."""
 
-    def __init__(self, quantile: float, fit_intercept: bool = False) -> None:
+    def __init__(self, quantile: float = 0.5, fit_intercept: bool = False) -> None:
         """Initialize QRM model.
 
         :param quantile: quantile

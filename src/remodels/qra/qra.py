@@ -9,7 +9,7 @@ from ._linear_model import _LinearModel
 class QRA(_LinearModel):
     """QRA."""
 
-    def __init__(self, quantile: float, fit_intercept: bool = False) -> None:
+    def __init__(self, quantile: float = 0.5, fit_intercept: bool = False) -> None:
         """Initialize QRA model.
 
         :param quantile: quantile
