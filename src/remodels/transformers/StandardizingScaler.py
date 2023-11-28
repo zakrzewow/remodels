@@ -45,6 +45,9 @@ class StandardizingScaler(BaseScaler):
         else:
             center = np.mean(data)
             scale = np.std(data)
+
+        # Avoid division by zero: if scale is 0, set it to 1
+        scale = 1 if scale == 0 else scale
         return center, scale
 
     def fit(self, X, y=None):
@@ -100,6 +103,22 @@ class StandardizingScaler(BaseScaler):
             return X_transformed
         y_transformed = (np.array(y) - self.y_center) / self.y_scale
         return X_transformed, self._to_dataframe(y, y_transformed)
+
+    def _apply_inverse_transform(self, data, centers, scales):
+        """Apply the inverse transformation to the data.
+
+        :param data: Transformed data to inverse transform.
+        :type data: array-like
+        :param centers: Centers used in the original transformation.
+        :type centers: array-like
+        :param scales: Scales used in the original transformation.
+        :type scales: array-like
+        :return: Original data before transformation.
+        :rtype: array-like
+        """
+        if len(data.shape) == 1:
+            return data * scales + centers
+        return data * scales.reshape(1, -1) + centers.reshape(1, -1)
 
     def inverse_transform(self, X=None, y=None):
         """Apply the inverse transformation to the features X and optionally the target y.
