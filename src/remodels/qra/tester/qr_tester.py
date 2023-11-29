@@ -3,6 +3,7 @@
 import concurrent.futures
 from itertools import repeat
 from typing import Callable
+from typing import Iterable
 
 import numpy as np
 from scipy.stats import chi2
@@ -83,11 +84,62 @@ class QR_Tester:
             ):
                 Y_pred[i : i + self.prediction_window, q - 1] = y_test
 
+        Y_pred = np.sort(Y_pred, axis=1)
+
         return _Results(
             Y_pred,
             y[self.calibration_window :],
             self.prediction_window,
         )
+
+
+def q_ave(*results: Iterable["_Results"]):
+    """Results quantile averaging."""
+    for r in results:
+        assert r.Y_pred.shape == results[0].Y_pred.shape
+        assert np.array_equal(r.y_test, results[0].y_test)
+        assert r.prediction_window == results[0].prediction_window
+
+    Y_pred_qave = np.array([r.Y_pred for r in results]).mean(axis=0)
+
+    return _Results(
+        Y_pred=Y_pred_qave,
+        y_test=results[0].y_test,
+        prediction_window=results[0].prediction_window,
+    )
+
+
+def f_ave(*results: Iterable["_Results"]):
+    """Results probability averaging."""
+    for r in results:
+        assert r.Y_pred.shape == results[0].Y_pred.shape
+        assert np.array_equal(r.y_test, results[0].y_test)
+        assert r.prediction_window == results[0].prediction_window
+
+    Y_pred_fave = np.zeros_like(results[0].Y_pred)
+
+    for k in range(Y_pred_fave.shape[0]):
+        rows = [r.Y_pred[k, :] for r in results]
+        linspace = np.sort(np.concatenate(rows))
+
+        q = np.zeros_like(linspace)
+
+        for idx, x in enumerate(linspace):
+            q[idx] = np.mean([(row <= x).sum() for row in rows])
+
+        q = (np.ceil(q) - 1).astype(int)
+
+        fave = np.zeros(shape=(99,))
+        for i in range(99):
+            fave[i] = np.mean(linspace[q == i])
+
+        Y_pred_fave[k, :] = fave
+
+    return _Results(
+        Y_pred=Y_pred_fave,
+        y_test=results[0].y_test,
+        prediction_window=results[0].prediction_window,
+    )
 
 
 class _Results:
