@@ -7,6 +7,7 @@ from typing import Iterable
 
 import numpy as np
 from scipy.stats import chi2
+from tqdm.auto import tqdm
 
 from remodels.qra import QRA
 
@@ -25,8 +26,9 @@ class QR_Tester:
 
     def __init__(
         self,
-        calibration_window: int = 14,
-        prediction_window: int = 1,
+        calibration_window: int = 7 * 24,
+        prediction_window: int = 24,
+        multivariate: bool = True,
         qr_model=_default_qr_model,
         max_workers: int = None,
     ) -> None:
@@ -43,6 +45,7 @@ class QR_Tester:
         """
         self.calibration_window = calibration_window
         self.prediction_window = prediction_window
+        self.multivatiate = multivariate
         self.qr_model = qr_model
         self.max_workers = max_workers
 
@@ -60,10 +63,12 @@ class QR_Tester:
 
         Y_pred = np.zeros((X.shape[0] - self.calibration_window, 99), np.float_)
 
-        for i in range(
-            0,
-            X.shape[0] - self.calibration_window - self.prediction_window + 1,
-            self.prediction_window,
+        for i in tqdm(
+            range(
+                0,
+                X.shape[0] - self.calibration_window,
+                self.prediction_window,
+            )
         ):
             X_train = X[i : i + self.calibration_window]
             y_train = y[i : i + self.calibration_window]
@@ -73,16 +78,30 @@ class QR_Tester:
                 + self.calibration_window
                 + self.prediction_window
             ]
-
-            for q, y_test in executor.map(
-                _process,
-                repeat(X_train),
-                repeat(y_train),
-                repeat(X_test),
-                range(1, 100),
-                repeat(self.qr_model),
-            ):
-                Y_pred[i : i + self.prediction_window, q - 1] = y_test
+            if self.multivatiate:
+                for h in range(self.prediction_window):
+                    X_train_h = X_train[h :: self.prediction_window]
+                    y_train_h = y_train[h :: self.prediction_window]
+                    X_test_h = X_test[h :: self.prediction_window]
+                    for q, y_test in executor.map(
+                        _process,
+                        repeat(X_train_h),
+                        repeat(y_train_h),
+                        repeat(X_test_h),
+                        range(1, 100),
+                        repeat(self.qr_model),
+                    ):
+                        Y_pred[i + h, q - 1] = y_test
+            else:
+                for q, y_test in executor.map(
+                    _process,
+                    repeat(X_train),
+                    repeat(y_train),
+                    repeat(X_test),
+                    range(1, 100),
+                    repeat(self.qr_model),
+                ):
+                    Y_pred[i : i + self.prediction_window, q - 1] = y_test
 
         Y_pred = np.sort(Y_pred, axis=1)
 
