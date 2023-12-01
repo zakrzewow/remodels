@@ -1,6 +1,7 @@
 """*QR* tester."""
 
 import concurrent.futures
+import pickle
 from itertools import repeat
 from typing import Callable
 from typing import Iterable
@@ -31,6 +32,7 @@ class QR_Tester:
         multivariate: bool = True,
         qr_model=_default_qr_model,
         max_workers: int = None,
+        progress: bool = True,
     ) -> None:
         """Init tester.
 
@@ -48,8 +50,9 @@ class QR_Tester:
         self.multivatiate = multivariate
         self.qr_model = qr_model
         self.max_workers = max_workers
+        self.progress = progress
 
-    def fit_predict(self, X: np.array, y: np.array) -> "_Results":
+    def fit_predict(self, X: np.array, y: np.array) -> "QR_TestResults":
         """Fit predict.
 
         :param X: data matrix
@@ -68,7 +71,8 @@ class QR_Tester:
                 0,
                 X.shape[0] - self.calibration_window,
                 self.prediction_window,
-            )
+            ),
+            disable=not self.progress,
         ):
             X_train = X[i : i + self.calibration_window]
             y_train = y[i : i + self.calibration_window]
@@ -105,14 +109,14 @@ class QR_Tester:
 
         Y_pred = np.sort(Y_pred, axis=1)
 
-        return _Results(
+        return QR_TestResults(
             Y_pred,
             y[self.calibration_window :],
             self.prediction_window,
         )
 
 
-def q_ave(*results: Iterable["_Results"]):
+def q_ave(*results: Iterable["QR_TestResults"]):
     """Results quantile averaging."""
     for r in results:
         assert r.Y_pred.shape == results[0].Y_pred.shape
@@ -121,14 +125,14 @@ def q_ave(*results: Iterable["_Results"]):
 
     Y_pred_qave = np.array([r.Y_pred for r in results]).mean(axis=0)
 
-    return _Results(
+    return QR_TestResults(
         Y_pred=Y_pred_qave,
         y_test=results[0].y_test,
         prediction_window=results[0].prediction_window,
     )
 
 
-def f_ave(*results: Iterable["_Results"]):
+def f_ave(*results: Iterable["QR_TestResults"]):
     """Results probability averaging."""
     for r in results:
         assert r.Y_pred.shape == results[0].Y_pred.shape
@@ -154,14 +158,14 @@ def f_ave(*results: Iterable["_Results"]):
 
         Y_pred_fave[k, :] = fave
 
-    return _Results(
+    return QR_TestResults(
         Y_pred=Y_pred_fave,
         y_test=results[0].y_test,
         prediction_window=results[0].prediction_window,
     )
 
 
-class _Results:
+class QR_TestResults:
     """Results."""
 
     def __init__(
@@ -182,6 +186,28 @@ class _Results:
         self.Y_pred = Y_pred
         self.y_test = y_test
         self.prediction_window = prediction_window
+
+    def to_pickle(self, file):
+        """Save QR Test Results to pickle.
+
+        :param file: pickle file
+        :type file: FileDescriptorOrPath
+        """
+        with open(file, "wb") as f:
+            pickle.dump(self, f)
+
+    @staticmethod
+    def read_pickle(file):
+        """Read QR Test Results from pickle.
+
+        :param file: pickle file
+        :type file: FileDescriptorOrPath
+        :return: QR Test Results object
+        :rtype: QR_TestResults
+        """
+        with open(file, "rb") as f:
+            qr_test_results = pickle.load(f)
+        return qr_test_results
 
     def aec(self, alpha: int) -> float:
         """Average empirical coverage.

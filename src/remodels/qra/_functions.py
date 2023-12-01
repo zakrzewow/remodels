@@ -69,6 +69,7 @@ def _sqra(X, y, quantile: float = 0.5, H: float = None, fit_intercept=False):
         resid_std = np.std(residuals)
         resid_iqr = iqr(residuals)
         H = min(resid_std, resid_iqr) * 1.06 * (X.shape[0] ** (-1 / 5))
+    H = max(H, 1e-4)
 
     def rho(beta):
         residuals = y - X @ beta

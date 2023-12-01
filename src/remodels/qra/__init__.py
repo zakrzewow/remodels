@@ -10,5 +10,6 @@ from .sfqrm import sFQRM
 from .sqra import SQRA
 from .sqrm import SQRM
 from .tester import QR_Tester
+from .tester import QR_TestResults
 from .tester import f_ave
 from .tester import q_ave
