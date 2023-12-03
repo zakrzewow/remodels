@@ -91,5 +91,5 @@ def _sqra(X, y, quantile: float = 0.5, H: float = None, fit_intercept=False):
         method="Newton-CG",
         jac=rho_der,
         hess=rho_hess,
-        options=dict(xtol=1e-4),
+        options=dict(xtol=1e-5),
     ).x

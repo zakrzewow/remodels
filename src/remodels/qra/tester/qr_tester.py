@@ -154,7 +154,17 @@ def f_ave(*results: Iterable["QR_TestResults"]):
 
         fave = np.zeros(shape=(99,))
         for i in range(99):
-            fave[i] = np.mean(linspace[q == i])
+            slice_ = linspace[q == i]
+            if slice_.shape[0] != 0:
+                fave[i] = np.mean(slice_)
+        for i in range(99):
+            if fave[i] == 0:
+                if i == 0:
+                    fave[i] = fave[i + 1]
+                elif i == 98:
+                    fave[i] = fave[i - 1]
+                else:
+                    fave[i] = (fave[i - 1] + fave[i + 1]) / 2
 
         Y_pred_fave[k, :] = fave
 
