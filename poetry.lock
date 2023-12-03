@@ -1570,6 +1570,23 @@ optional = false
 python-versions = ">= 3.8"
 
 [[package]]
+name = "tqdm"
+version = "4.66.1"
+description = "Fast, Extensible Progress Meter"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-xdist"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "traitlets"
 version = "5.12.0"
 description = "Traitlets Python configuration system"
@@ -1683,7 +1700,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-ena
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "2a2d67a38440fbd9fdeed2bdd40ce9ee76273c41b5af38a6ad3d93fd33d90a4d"
+content-hash = "42564c48bb44f801220165d47b516582367dd7b0315893014845c4b0b7889050"
 
 [metadata.files]
 alabaster = []
@@ -1810,6 +1827,7 @@ threadpoolctl = []
 tokenize-rt = []
 tomli = []
 tornado = []
+tqdm = []
 traitlets = []
 typeguard = []
 typing-extensions = []

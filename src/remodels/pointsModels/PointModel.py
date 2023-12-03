@@ -93,21 +93,18 @@ class PointModel:
         :return: Transformed features and optionally transformed target.
         :rtype: tuple or pandas.DataFrame
         """
-        # Separate columns by data type
         float_columns, non_float_columns = self.separate_columns_by_dtype(
             Xy[self.all_used_columns]
         )
         non_float_data = Xy[non_float_columns]
 
         if is_train:
-            # Fit and transform the data
             X, y = self.transformation_pipeline.fit_transform(
                 Xy[float_columns], Xy[self.y_column]
             )
             X = pd.concat([X, non_float_data], axis=1)
             return X, y
         else:
-            # Only transform the data
             X_transformed = self.transformation_pipeline.transform(Xy[float_columns])
             X = pd.concat([X_transformed, non_float_data], axis=1)
             return X
@@ -178,18 +175,15 @@ class PointModel:
                 day, Xy_train, Xy_test, predictions_list, inverse_predictions
             )
 
-        # Prepare DataFrame from predictions_list
         new_predictions_df = pd.DataFrame(
             predictions_list, columns=["DateTime", f"prediction_{rolling_window}rw"]
         )
         new_predictions_df.set_index("DateTime", inplace=True)
 
-        # Update or create the self.predictions DataFrame
         if (
             self.predictions is not None
             and new_predictions_df.columns[0] not in self.predictions.columns
         ):
-            # Merge with existing predictions on DateTime index
             self.predictions = self.predictions.join(new_predictions_df, how="outer")
         else:
             self.predictions = new_predictions_df
@@ -216,20 +210,15 @@ class PointModel:
         if self.training_data is None:
             raise ValueError("Model has not been fitted with training data yet.")
 
-        # Align the predictions with the actual values based on the datetime index
         aligned_df = self.training_data[self.y_column].join(
             self.predictions, how="inner"
         )
-
-        # Extract the actual and predicted values
         actual_values = aligned_df[self.y_column[0]]
         metrics = {}
         for col in self.predictions.columns:
             if col.startswith("prediction_"):
-                # Calculate metrics for each set of predictions
                 metrics[col] = self.calculate_metrics(actual_values, aligned_df[col])
 
-        # Convert metrics to DataFrame for easier analysis
         metrics_df = pd.DataFrame(metrics).T
 
         return metrics_df

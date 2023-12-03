@@ -50,18 +50,18 @@ class RePipeline(Pipeline):
         :return: The transformed feature data, and optionally target data.
         """
         Xt, yt = X, y
-        # Process all steps except the last one using fit_transform if available.
-        for _, step_process in self.steps[:-1]:
-            if hasattr(step_process, "fit_transform"):
+        for name, step in self.steps[:-1]:
+            if hasattr(step, "fit_transform"):
                 Xt, yt = (
-                    step_process.fit_transform(Xt, yt, **fit_params)
+                    step.fit_transform(Xt, yt, **fit_params)
                     if yt is not None
-                    else (step_process.fit_transform(Xt, **fit_params), None)
+                    else (step.fit_transform(Xt, **fit_params), None)
                 )
             else:
-                Xt, yt = self._process_step(step_process, Xt, yt, **fit_params)
+                Xt, yt = self._process_step(step, Xt, yt, **fit_params)
 
         # Fit and transform the last step.
+        # Process the last step
         final_step = self.steps[-1][1]
         if hasattr(final_step, "fit_transform"):
             return (
@@ -71,11 +71,7 @@ class RePipeline(Pipeline):
             )
         else:
             final_step.fit(Xt, yt, **fit_params)
-            return (
-                final_step.transform(Xt, yt)
-                if yt is not None
-                else final_step.transform(Xt)
-            )
+            return final_step.transform(Xt), yt
 
     def transform(self, X, y=None):
         """Apply transforms to the data, and the transform method of the final estimator.

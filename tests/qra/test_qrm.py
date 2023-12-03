@@ -15,7 +15,6 @@ def test_qrm_predicitons(sample_data: Tuple[np.array, np.array]) -> None:
     X_, y_ = sample_data
 
     qrm_predictions = QRM(0.5, True).fit(X_, y_).predict(X_)
-
     X_mean = np.mean(X_, axis=1, keepdims=True)
     sklearn_qr_predictions = (
         QuantileRegressor(quantile=0.5, alpha=0, fit_intercept=True, solver="highs")

@@ -9,6 +9,6 @@
 /src/*.egg-info/
 __pycache__/
 *.ipynb
-!usage.ipynb
+!notebooks/*.ipynb
 *.pkl
 *.csv

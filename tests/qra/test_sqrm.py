@@ -16,5 +16,5 @@ def test_sqrm_predicitons(sample_data: Tuple[np.array, np.array]) -> None:
         991.161454057788, abs=1e-2
     )
     assert SQRM(0.5, None, True).fit(X_, y_).predict(X_).sum() == pytest.approx(
-        990.1044896031061, abs=1e-2
+        990.1839456841076, abs=1e-2
     )

@@ -68,7 +68,8 @@ def _sqra(X, y, quantile: float = 0.5, H: float = None, fit_intercept=False):
         residuals = y - (X @ beta__initial_guess)
         resid_std = np.std(residuals)
         resid_iqr = iqr(residuals)
-        H = min(resid_std, resid_iqr / 1.38898) * 1.06 * (X.shape[0] ** (-1 / 5))
+        H = min(resid_std, resid_iqr) * 1.06 * (X.shape[0] ** (-1 / 5))
+    H = max(H, 1e-4)
 
     def rho(beta):
         residuals = y - X @ beta
@@ -77,4 +78,18 @@ def _sqra(X, y, quantile: float = 0.5, H: float = None, fit_intercept=False):
             + (quantile - norm.cdf(-residuals / H)) @ residuals
         )
 
-    return minimize(rho, beta__initial_guess, method="TNC").x
+    def rho_der(beta):
+        residuals = y - X @ beta
+        return (X.T @ (norm.cdf(-residuals / H) - quantile)) / X.shape[0]
+
+    def rho_hess(beta):
+        return X.T @ (X * (norm.pdf((X @ beta - y) / H) / H)[np.newaxis].T) / X.shape[0]
+
+    return minimize(
+        rho,
+        beta__initial_guess,
+        method="Newton-CG",
+        jac=rho_der,
+        hess=rho_hess,
+        options=dict(xtol=1e-5),
+    ).x

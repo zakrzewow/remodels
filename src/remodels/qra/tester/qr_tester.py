@@ -1,11 +1,14 @@
 """*QR* tester."""
 
 import concurrent.futures
+import pickle
 from itertools import repeat
 from typing import Callable
+from typing import Iterable
 
 import numpy as np
 from scipy.stats import chi2
+from tqdm.auto import tqdm
 
 from remodels.qra import QRA
 
@@ -24,10 +27,12 @@ class QR_Tester:
 
     def __init__(
         self,
-        calibration_window: int = 14,
-        prediction_window: int = 1,
+        calibration_window: int = 7 * 24,
+        prediction_window: int = 24,
+        multivariate: bool = True,
         qr_model=_default_qr_model,
         max_workers: int = None,
+        progress: bool = True,
     ) -> None:
         """Init tester.
 
@@ -42,10 +47,12 @@ class QR_Tester:
         """
         self.calibration_window = calibration_window
         self.prediction_window = prediction_window
+        self.multivatiate = multivariate
         self.qr_model = qr_model
         self.max_workers = max_workers
+        self.progress = progress
 
-    def fit_predict(self, X: np.array, y: np.array) -> "_Results":
+    def fit_predict(self, X: np.array, y: np.array) -> "QR_TestResults":
         """Fit predict.
 
         :param X: data matrix
@@ -59,10 +66,13 @@ class QR_Tester:
 
         Y_pred = np.zeros((X.shape[0] - self.calibration_window, 99), np.float_)
 
-        for i in range(
-            0,
-            X.shape[0] - self.calibration_window - self.prediction_window + 1,
-            self.prediction_window,
+        for i in tqdm(
+            range(
+                0,
+                X.shape[0] - self.calibration_window,
+                self.prediction_window,
+            ),
+            disable=not self.progress,
         ):
             X_train = X[i : i + self.calibration_window]
             y_train = y[i : i + self.calibration_window]
@@ -72,25 +82,100 @@ class QR_Tester:
                 + self.calibration_window
                 + self.prediction_window
             ]
+            if self.multivatiate:
+                for h in range(self.prediction_window):
+                    X_train_h = X_train[h :: self.prediction_window]
+                    y_train_h = y_train[h :: self.prediction_window]
+                    X_test_h = X_test[h :: self.prediction_window]
+                    for q, y_test in executor.map(
+                        _process,
+                        repeat(X_train_h),
+                        repeat(y_train_h),
+                        repeat(X_test_h),
+                        range(1, 100),
+                        repeat(self.qr_model),
+                    ):
+                        Y_pred[i + h, q - 1] = y_test
+            else:
+                for q, y_test in executor.map(
+                    _process,
+                    repeat(X_train),
+                    repeat(y_train),
+                    repeat(X_test),
+                    range(1, 100),
+                    repeat(self.qr_model),
+                ):
+                    Y_pred[i : i + self.prediction_window, q - 1] = y_test
 
-            for q, y_test in executor.map(
-                _process,
-                repeat(X_train),
-                repeat(y_train),
-                repeat(X_test),
-                range(1, 100),
-                repeat(self.qr_model),
-            ):
-                Y_pred[i : i + self.prediction_window, q - 1] = y_test
+        Y_pred = np.sort(Y_pred, axis=1)
 
-        return _Results(
+        return QR_TestResults(
             Y_pred,
             y[self.calibration_window :],
             self.prediction_window,
         )
 
 
-class _Results:
+def q_ave(*results: Iterable["QR_TestResults"]):
+    """Results quantile averaging."""
+    for r in results:
+        assert r.Y_pred.shape == results[0].Y_pred.shape
+        assert np.array_equal(r.y_test, results[0].y_test)
+        assert r.prediction_window == results[0].prediction_window
+
+    Y_pred_qave = np.array([r.Y_pred for r in results]).mean(axis=0)
+
+    return QR_TestResults(
+        Y_pred=Y_pred_qave,
+        y_test=results[0].y_test,
+        prediction_window=results[0].prediction_window,
+    )
+
+
+def f_ave(*results: Iterable["QR_TestResults"]):
+    """Results probability averaging."""
+    for r in results:
+        assert r.Y_pred.shape == results[0].Y_pred.shape
+        assert np.array_equal(r.y_test, results[0].y_test)
+        assert r.prediction_window == results[0].prediction_window
+
+    Y_pred_fave = np.zeros_like(results[0].Y_pred)
+
+    for k in range(Y_pred_fave.shape[0]):
+        rows = [r.Y_pred[k, :] for r in results]
+        linspace = np.sort(np.concatenate(rows))
+
+        q = np.zeros_like(linspace)
+
+        for idx, x in enumerate(linspace):
+            q[idx] = np.mean([(row <= x).sum() for row in rows])
+
+        q = (np.ceil(q) - 1).astype(int)
+
+        fave = np.zeros(shape=(99,))
+        for i in range(99):
+            slice_ = linspace[q == i]
+            if slice_.shape[0] != 0:
+                fave[i] = np.mean(slice_)
+        for i in range(99):
+            if fave[i] == 0:
+                if i == 0:
+                    fave[i] = fave[i + 1]
+                elif i == 98:
+                    fave[i] = fave[i - 1]
+                else:
+                    fave[i] = (fave[i - 1] + fave[i + 1]) / 2
+
+        Y_pred_fave[k, :] = fave
+
+    return QR_TestResults(
+        Y_pred=Y_pred_fave,
+        y_test=results[0].y_test,
+        prediction_window=results[0].prediction_window,
+    )
+
+
+class QR_TestResults:
     """Results."""
 
     def __init__(
@@ -111,6 +196,28 @@ class _Results:
         self.Y_pred = Y_pred
         self.y_test = y_test
         self.prediction_window = prediction_window
+
+    def to_pickle(self, file):
+        """Save QR Test Results to pickle.
+
+        :param file: pickle file
+        :type file: FileDescriptorOrPath
+        """
+        with open(file, "wb") as f:
+            pickle.dump(self, f)
+
+    @staticmethod
+    def read_pickle(file):
+        """Read QR Test Results from pickle.
+
+        :param file: pickle file
+        :type file: FileDescriptorOrPath
+        :return: QR Test Results object
+        :rtype: QR_TestResults
+        """
+        with open(file, "rb") as f:
+            qr_test_results = pickle.load(f)
+        return qr_test_results
 
     def aec(self, alpha: int) -> float:
         """Average empirical coverage.
