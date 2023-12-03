@@ -42,14 +42,14 @@ class DSTAdjuster(BaseScaler):
         X_adj = X.tz_localize(None).resample("H").mean()
 
         # Fill missing values by averaging the adjacent values, then forward fill.
-        X_adj = X_adj.fillna(method="bfill").fillna(method="ffill")
+        X_adj = X_adj.fillna(X_adj.shift(-1) / 2 + X_adj.shift(1) / 2)
 
         if y is not None:
             # Ensure y is a pandas Series with the correct index.
             y_adj = pd.Series(y, index=X_adj.index)
 
             # Fill missing values in y using the same approach as for X.
-            y_adj = y_adj.fillna(method="bfill").fillna(method="ffill")
+            y_adj = y_adj.fillna(y_adj.shift(-1) / 2 + y_adj.shift(1) / 2)
 
             return X_adj, y_adj
 
