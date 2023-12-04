@@ -9,6 +9,7 @@ from . import sample_dfs
 
 
 def test_logistic_scaler_transform(sample_dfs):
+    """Test LogisticScaler for correct logistic transformation."""
     X_df, y_df = sample_dfs
     scaler = LogisticScaler()
 
@@ -21,6 +22,7 @@ def test_logistic_scaler_transform(sample_dfs):
 
 
 def test_logistic_scaler_inverse_transform(sample_dfs):
+    """Check LogisticScaler's inverse transform accuracy."""
     X_df, y_df = sample_dfs
     scaler = LogisticScaler()
 
@@ -32,6 +34,7 @@ def test_logistic_scaler_inverse_transform(sample_dfs):
 
 
 def test_logistic_scaler_output_types(sample_dfs):
+    """Ensure LogisticScaler's output types are DataFrames."""
     X_df, y_df = sample_dfs
     scaler = LogisticScaler()
 

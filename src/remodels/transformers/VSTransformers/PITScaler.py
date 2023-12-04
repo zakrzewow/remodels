@@ -1,3 +1,5 @@
+"""PITScaler."""
+
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
@@ -7,13 +9,31 @@ from remodels.transformers.BaseScaler import BaseScaler
 
 
 class PITScaler(BaseScaler):
+    """PIT-Scaler."""
+
     def __init__(self, distribution="normal", nu=8):
+        """Initialize the PIT-Scaler.
+
+        :param distribution: distribution, defaults to "normal"
+        :type distribution: str, optional
+        :param nu: distribution parameter, defaults to 8
+        :type nu: int, optional
+        """
         self.distribution = distribution
         self.nu = nu
         self.empirical_cdfs = {}
         self.y_column_name = None
 
     def fit(self, X, y=None):
+        """Fit the scaler to the data.
+
+        :param X: Input data.
+        :type X: array-like
+        :param y: Optional, target values (None by default).
+        :type y: array-like, optional
+        :return: Returns self.
+        :rtype: PITScaler
+        """
         if y is not None:
             y_name = y.columns[0]
             self.y_column_name = y_name
@@ -29,6 +49,15 @@ class PITScaler(BaseScaler):
         return self
 
     def transform(self, X, y=None):
+        """Transforms the data.
+
+        :param X: Input data to transform.
+        :type X: array-like
+        :param y: Optional, target values (None by default).
+        :type y: array-like, optional
+        :return: Transformed data.
+        :rtype: array-like
+        """
         transformed_data = pd.DataFrame(index=X.index)
         for column in X.columns:
             sorted_data, empirical_cdf = self.empirical_cdfs[column]
@@ -57,6 +86,15 @@ class PITScaler(BaseScaler):
             raise ValueError("Invalid distribution type. Use 'normal' or 'student-t'.")
 
     def inverse_transform(self, X=None, y=None):
+        """Inverse transform the features and optionally the target.
+
+        :param X: Transformed features to inverse transform.
+        :type X: np.ndarray
+        :param y: Transformed target to inverse transform.
+        :type y: np.ndarray, optional
+        :return: Original features and optionally original target.
+        :rtype: tuple
+        """
         if X is not None:
             inverted_data = pd.DataFrame(index=X.index)
             for column in X.columns:

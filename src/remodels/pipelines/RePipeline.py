@@ -50,7 +50,7 @@ class RePipeline(Pipeline):
         :return: The transformed feature data, and optionally target data.
         """
         Xt, yt = X, y
-        for name, step in self.steps[:-1]:
+        for _, step in self.steps[:-1]:
             if hasattr(step, "fit_transform"):
                 Xt, yt = (
                     step.fit_transform(Xt, yt, **fit_params)

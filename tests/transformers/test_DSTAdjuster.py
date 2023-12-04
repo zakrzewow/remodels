@@ -1,11 +1,12 @@
-"""Test cases for the DSTAdjuster transformer"""
+"""Test cases for the DSTAdjuster transformer."""
 import pandas as pd
 import pytest
 
 from remodels.transformers.DSTAdjuster import DSTAdjuster
 
 
-def test_dst_adjuster_spring_adjustment():
+def test_dst_adjuster_spring_adjustment() -> None:
+    """Test DSTAdjuster for correct handling of spring DST transition."""
     spring_rng = pd.date_range("2023-03-26 01:00:00", periods=4, freq="H", tz="CET")
     spring_X = pd.DataFrame({"value": [1, 3, 4, 5]}, index=spring_rng)
     dst_adjuster = DSTAdjuster()
@@ -18,7 +19,8 @@ def test_dst_adjuster_spring_adjustment():
     assert all(spring_X_transformed["value"] == spring_expected_values)
 
 
-def test_dst_adjuster_autumn_adjustment():
+def test_dst_adjuster_autumn_adjustment() -> None:
+    """Test DSTAdjuster for correct handling of autumn DST transition."""
     autumn_rng = pd.date_range("2023-10-29 01:00:00", periods=5, freq="H", tz="CET")
     autumn_X = pd.DataFrame({"value": [1, 2, 3, 4, 5]}, index=autumn_rng)
     dst_adjuster = DSTAdjuster()
@@ -31,8 +33,8 @@ def test_dst_adjuster_autumn_adjustment():
     assert all(autumn_X_transformed["value"] == autumn_expected_values)
 
 
-def test_dst_adjuster_return_types():
-    # Sample data for spring and autumn DST adjustments
+def test_dst_adjuster_return_types() -> None:
+    """Transformed output of DSTAdjuster is DataFrame."""
     spring_rng = pd.date_range("2023-03-26 01:00:00", periods=4, freq="H", tz="CET")
     spring_X = pd.DataFrame({"value": [1, 3, 4, 5]}, index=spring_rng)
     autumn_rng = pd.date_range("2023-10-29 01:00:00", periods=5, freq="H", tz="CET")
@@ -40,11 +42,8 @@ def test_dst_adjuster_return_types():
 
     dst_adjuster = DSTAdjuster()
 
-    # Test spring DST adjustment
     spring_X_transformed = dst_adjuster.transform(spring_X)
-    # Test autumn DST adjustment
     autumn_X_transformed = dst_adjuster.transform(autumn_X)
 
-    # Check if the transformed data is returned as a DataFrame
     assert isinstance(spring_X_transformed, pd.DataFrame)
     assert isinstance(autumn_X_transformed, pd.DataFrame)

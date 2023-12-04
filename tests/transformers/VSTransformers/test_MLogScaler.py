@@ -9,6 +9,7 @@ from . import sample_dfs
 
 
 def test_mlog_scaler_transform(sample_dfs):
+    """Test MLogScaler for correct modified logarithmic transformation."""
     X_df, y_df = sample_dfs
     scaler = MLogScaler(c=1 / 3)
 
@@ -21,6 +22,7 @@ def test_mlog_scaler_transform(sample_dfs):
 
 
 def test_mlog_scaler_inverse_transform(sample_dfs):
+    """Ensure MLogScaler's inverse transform restores original data accurately."""
     X_df, y_df = sample_dfs
     scaler = MLogScaler(c=1 / 3)
 
@@ -32,6 +34,7 @@ def test_mlog_scaler_inverse_transform(sample_dfs):
 
 
 def test_mlog_scaler_output_types(sample_dfs):
+    """Check MLogScaler's output types for transformations."""
     X_df, y_df = sample_dfs
     scaler = MLogScaler(c=1 / 3)
 
