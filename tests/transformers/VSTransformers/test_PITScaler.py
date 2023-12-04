@@ -11,6 +11,7 @@ from . import sample_dfs
 
 
 def test_pit_scaler_normal_transform(sample_dfs):
+    """Test PITScaler with normal distribution for finite transformed values."""
     X_df, y_df = sample_dfs
     scaler = PITScaler(distribution="normal")
 
@@ -23,6 +24,7 @@ def test_pit_scaler_normal_transform(sample_dfs):
 
 
 def test_pit_scaler_student_t_transform(sample_dfs):
+    """Test PITScaler with student-t distribution for finite transformed values."""
     X_df, y_df = sample_dfs
     scaler = PITScaler(distribution="student-t")
 
@@ -35,6 +37,7 @@ def test_pit_scaler_student_t_transform(sample_dfs):
 
 
 def test_pit_scaler_inverse_transform(sample_dfs):
+    """Check PITScaler's inverse transform restores original data."""
     X_df, y_df = sample_dfs
     scaler = PITScaler(distribution="normal")
 
@@ -46,6 +49,7 @@ def test_pit_scaler_inverse_transform(sample_dfs):
 
 
 def test_pit_scaler_output_types(sample_dfs):
+    """Ensure PITScaler's output types are DataFrames."""
     X_df, y_df = sample_dfs
     scaler = PITScaler(distribution="normal")
 

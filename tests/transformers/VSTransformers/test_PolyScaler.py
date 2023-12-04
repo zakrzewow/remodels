@@ -9,6 +9,7 @@ from . import sample_dfs
 
 
 def test_poly_scaler_transform(sample_dfs):
+    """Test PolyScaler for correct polynomial transformation."""
     X_df, y_df = sample_dfs
     scaler = PolyScaler(lamb=0.125, c=0.05)
 
@@ -17,12 +18,12 @@ def test_poly_scaler_transform(sample_dfs):
     expected_X = np.sign(X_df) * ((np.abs(X_df) + c_lamb) ** 0.125 - c_lamb ** (0.125))
     expected_y = np.sign(y_df) * ((np.abs(y_df) + c_lamb) ** 0.125 - c_lamb ** (0.125))
 
-    # Ensure to compare transformed and expected values correctly
     assert np.allclose(X_transformed.values, expected_X, atol=1e-2)
     assert np.allclose(y_transformed.values, expected_y, atol=1e-2)
 
 
 def test_poly_scaler_inverse_transform(sample_dfs):
+    """Check PolyScaler's inverse transform restores original data."""
     X_df, y_df = sample_dfs
     scaler = PolyScaler(lamb=0.125, c=0.05)
 
@@ -34,6 +35,7 @@ def test_poly_scaler_inverse_transform(sample_dfs):
 
 
 def test_poly_scaler_output_types(sample_dfs):
+    """Ensure PolyScaler's output types are DataFrames."""
     X_df, y_df = sample_dfs
     scaler = PolyScaler(lamb=0.125, c=0.05)
 

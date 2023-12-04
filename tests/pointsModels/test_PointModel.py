@@ -1,3 +1,7 @@
+"""Test cases for the PointModel."""
+
+from typing import Tuple
+
 import pandas as pd
 import pytest
 from sklearn.linear_model import LinearRegression
@@ -10,14 +14,23 @@ from . import sample_dfs
 
 
 class MockTransformer(BaseScaler):
-    def transform(self, X, y=None):
+    """A mock transformer class for testing purposes."""
+
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+        """Transforms the data by simply passing it through."""
         return (X, y) if y is not None else X
 
-    def inverse_transform(self, X=None, y=None):
+    def inverse_transform(
+        self, X: pd.DataFrame = None, y: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Inverse transformation that simply returns the original data."""
         return X, y
 
 
-def test_pointmodel_initialization(sample_dfs):
+def test_pointmodel_initialization(
+    sample_dfs: Tuple[pd.DataFrame, pd.DataFrame]
+) -> None:
+    """Tests the initialization of PointModel."""
     X_df, y_df = sample_dfs
     pipeline = RePipeline(
         steps=[("mock", MockTransformer()), ("model", LinearRegression())]
@@ -33,7 +46,8 @@ def test_pointmodel_initialization(sample_dfs):
     assert isinstance(model, PointModel)
 
 
-def test_pointmodel_fit(sample_dfs):
+def test_pointmodel_fit(sample_dfs: Tuple[pd.DataFrame, pd.DataFrame]) -> None:
+    """Tests the fitting of PointModel."""
     X_df, y_df = sample_dfs
     pipeline = RePipeline(
         steps=[("mock", MockTransformer()), ("model", LinearRegression())]
@@ -50,7 +64,8 @@ def test_pointmodel_fit(sample_dfs):
     assert model.training_data is not None
 
 
-def test_pointmodel_predict(sample_dfs):
+def test_pointmodel_predict(sample_dfs: Tuple[pd.DataFrame, pd.DataFrame]) -> None:
+    """Tests the prediction capabilities of PointModel."""
     X_df, y_df = sample_dfs
     pipeline = RePipeline(
         steps=[("mock", MockTransformer()), ("model", LinearRegression())]
@@ -64,12 +79,12 @@ def test_pointmodel_predict(sample_dfs):
     )
 
     model.fit(X_df.join(y_df), start="2023-01-10", end="2023-01-14")
-    print(X_df.join(y_df))
     predictions = model.predict(rolling_window=5, inverse_predictions=True)
     assert isinstance(predictions, pd.DataFrame)
 
 
-def test_pointmodel_summary(sample_dfs):
+def test_pointmodel_summary(sample_dfs: Tuple[pd.DataFrame, pd.DataFrame]) -> None:
+    """Tests the summary generation of PointModel."""
     X_df, y_df = sample_dfs
     pipeline = RePipeline(
         steps=[("mock", MockTransformer()), ("model", LinearRegression())]

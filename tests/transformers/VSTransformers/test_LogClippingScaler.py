@@ -9,6 +9,7 @@ from . import sample_dfs
 
 
 def test_logclipping_scaler_transform(sample_dfs):
+    """Test LogClippingScaler for correct logarithmic clipping transformation."""
     X_df, y_df = sample_dfs
     scaler = LogClippingScaler(k=3)
 
@@ -31,6 +32,7 @@ def test_logclipping_scaler_transform(sample_dfs):
 
 
 def test_logclipping_scaler_inverse_transform(sample_dfs):
+    """Verify LogClippingScaler's inverse transform accuracy."""
     X_df, y_df = sample_dfs
     scaler = LogClippingScaler(k=3)
 
@@ -45,6 +47,7 @@ def test_logclipping_scaler_inverse_transform(sample_dfs):
 
 
 def test_logclipping_scaler_output_types(sample_dfs):
+    """Ensure LogClippingScaler's output types are DataFrames."""
     X_df, y_df = sample_dfs
     scaler = LogClippingScaler(k=3)
 
