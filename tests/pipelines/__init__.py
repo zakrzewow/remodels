@@ -1,4 +1,4 @@
-"""Test cases for the pipelines modules"""
+"""Test cases for the pipelines modules."""
 from typing import Tuple
 
 import numpy as np

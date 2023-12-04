@@ -9,6 +9,7 @@ from . import sample_dfs
 
 
 def test_clipping_scaler_transform(sample_dfs):
+    """Test ClippingScaler for correct data clipping."""
     X_df, y_df = sample_dfs
     scaler = ClippingScaler(k=3)
 
@@ -18,6 +19,7 @@ def test_clipping_scaler_transform(sample_dfs):
 
 
 def test_clipping_scaler_inverse_transform(sample_dfs):
+    """Ensure ClippingScaler's inverse transform returns clipped data."""
     X_df, y_df = sample_dfs
     scaler = ClippingScaler(k=3)
 
@@ -28,6 +30,7 @@ def test_clipping_scaler_inverse_transform(sample_dfs):
 
 
 def test_clipping_scaler_output_types(sample_dfs):
+    """Check ClippingScaler's output types for transformations."""
     X_df, y_df = sample_dfs
     scaler = ClippingScaler(k=3)
 

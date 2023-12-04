@@ -9,6 +9,7 @@ from . import sample_dfs
 
 
 def test_boxcox_scaler_output_types(sample_dfs):
+    """Ensure BoxCoxScaler's transform and inverse_transform return DataFrames."""
     X_df, y_df = sample_dfs
     scaler = BoxCoxScaler(lamb=0.5)
 
@@ -22,6 +23,7 @@ def test_boxcox_scaler_output_types(sample_dfs):
 
 
 def test_boxcox_scaler_known_values():
+    """Test BoxCoxScaler's transformation and inversion with known values."""
     scaler = BoxCoxScaler(lamb=0.5)
     X = pd.DataFrame([[0.1, 1], [2, 3]], columns=["feature1", "feature2"])
     y = pd.DataFrame([[0.1], [4]], columns=["target"])

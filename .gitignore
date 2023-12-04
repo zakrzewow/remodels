@@ -12,3 +12,4 @@ __pycache__/
 !notebooks/*.ipynb
 *.pkl
 *.csv
+*.html

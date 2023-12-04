@@ -9,6 +9,7 @@ from . import sample_dfs
 
 
 def test_arcsinh_scaler_transform_with_dataframe(sample_dfs):
+    """Verify ArcsinhScaler correctly transforms DataFrame using arcsinh."""
     X_df, y_df = sample_dfs
     scaler = ArcsinhScaler()
 
@@ -18,6 +19,7 @@ def test_arcsinh_scaler_transform_with_dataframe(sample_dfs):
 
 
 def test_arcsinh_scaler_inverse_transform_with_dataframe(sample_dfs):
+    """Check ArcsinhScaler correctly inverts transformation on DataFrame."""
     X_df, y_df = sample_dfs
     scaler = ArcsinhScaler()
 
@@ -28,6 +30,7 @@ def test_arcsinh_scaler_inverse_transform_with_dataframe(sample_dfs):
 
 
 def test_arcsinh_scaler_output_types(sample_dfs):
+    """Ensure ArcsinhScaler's transform and inverse_transform return DataFrames."""
     X_df, y_df = sample_dfs
     scaler = ArcsinhScaler()
 
