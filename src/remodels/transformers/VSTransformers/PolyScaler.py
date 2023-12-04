@@ -33,9 +33,6 @@ class PolyScaler(BaseScaler):
             - (self.c / self.lamb) ** (self.lamb / (self.lamb - 1))
         )
 
-        c_lamb = (0.05 / 0.125) ** (1 / (0.125 - 1))
-        expected_X = (np.abs(X_df) + c_lamb) ** 0.125 - c_lamb ** (0.125 / (0.125 - 1))
-
     def transform(self, X, y=None):
         """Transform the features and optionally the target.
 

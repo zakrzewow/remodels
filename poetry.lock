@@ -1635,37 +1635,6 @@ tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
-name = "pytest-html"
-version = "4.1.1"
-description = "pytest plugin for generating HTML reports"
-category = "dev"
-optional = false
-python-versions = ">=3.8"
-
-[package.dependencies]
-jinja2 = ">=3.0.0"
-pytest = ">=7.0.0"
-pytest-metadata = ">=2.0.0"
-
-[package.extras]
-docs = ["pip-tools (>=6.13.0)"]
-test = ["assertpy (>=1.1)", "beautifulsoup4 (>=4.11.1)", "black (>=22.1.0)", "flake8 (>=4.0.1)", "pre-commit (>=2.17.0)", "pytest-mock (>=3.7.0)", "pytest-rerunfailures (>=11.1.2)", "pytest-xdist (>=2.4.0)", "selenium (>=4.3.0)", "tox (>=3.24.5)"]
-
-[[package]]
-name = "pytest-metadata"
-version = "3.0.0"
-description = "pytest plugin for test session metadata"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-pytest = ">=7.0.0"
-
-[package.extras]
-test = ["black (>=22.1.0)", "flake8 (>=4.0.1)", "pre-commit (>=2.17.0)", "tox (>=3.24.5)"]
-
-[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -2374,7 +2343,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-ena
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "cc858583a0286554d18042467d9b7d95c16a8636458d545ce1f42005ecdd3a35"
+content-hash = "ee83cf5e5b9292f7e390cb6d496556098e40d129f42750fcef46037f5017c49e"
 
 [metadata.files]
 alabaster = []
@@ -2498,8 +2467,6 @@ pyflakes = []
 pygments = []
 pyparsing = []
 pytest = []
-pytest-html = []
-pytest-metadata = []
 python-dateutil = []
 python-json-logger = []
 pytz = []
