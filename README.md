@@ -21,13 +21,21 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-<!-- ## Installation
+## Installation
 
 You can install _remodels_ via [pip] from [PyPI]:
 
 ```console
 $ pip install remodels
-``` -->
+```
+
+Alternatively, you can install from source:
+
+```console
+$ git clone https://github.com/zakrzewow/remodels.git
+$ cd remodels
+$ pip install .
+```
 
 ## Usage
 
@@ -43,7 +51,7 @@ _remodels_ is free and open source software.
 This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter] template.
 
 [@cjolowicz]: https://github.com/cjolowicz
-[pypi]: https://pypi.org/
+[pypi]: https://pypi.org/project/remodels/
 [hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 [pip]: https://pip.pypa.io/
 

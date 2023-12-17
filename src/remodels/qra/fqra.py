@@ -63,8 +63,11 @@ class FQRA(QRA):
 
     def _get_factors(self, X: np.array) -> Tuple[np.array, np.array]:
         X_full = np.concatenate([self._X_train, X], axis=0)
-        _, _, Vh = np.linalg.svd(X_full, full_matrices=False)
-        F = (X_full @ Vh.T) / X.shape[1]
+        try:
+            _, _, Vh = np.linalg.svd(X_full, full_matrices=False)
+            F = (X_full @ Vh.T) / X.shape[1]
+        except np.linalg.LinAlgError:
+            F = X_full
         return F[: self._X_train.shape[0], :], F[self._X_train.shape[0] :, :]
 
     def _select_best_n_factors_with_bic(
