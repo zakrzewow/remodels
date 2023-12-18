@@ -1,26 +1,32 @@
 """PointModel."""
 import datetime as dt
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+from remodels.pipelines.RePipeline import RePipeline
 
 
 class PointModel:
-    """PointModel."""
+    """PointModel isa time-series prediction model designed to forecast electricity prices or similar data.
+    
+    This model is equipped with a flexible data processing pipeline and the ability to handle different sets 
+    of predictor variables for different hours of the day. It offers functionality for model training, 
+    prediction with a rolling window approach, and calculation of various evaluation metrics.
+    """
 
-    def __init__(self, pipeline, variables_per_hour, y_column="price_da"):
+    def __init__(self, pipeline: RePipeline, variables_per_hour: dict, y_column="price_da"):
         """Initialize the PointModel with a data processing pipeline, variables mapped to each hour, and the target column name.
 
         :param pipeline: Sequence of data transformation steps and a predictive model.
-        :type pipeline: list
+        :type pipeline: RePipeline
         :param variables_per_hour: Mapping from hour ranges to the variables to be used in those hours.
         :type variables_per_hour: dict
         :param y_column: The name of the target column.
         :type y_column: str
+        
         """
         self.variables_per_hour = variables_per_hour
         self.transformation_pipeline = pipeline[:-1]
@@ -39,27 +45,28 @@ class PointModel:
         self.predictions = None
         self.training_data = None
 
-    def fit(self, df, start, end):
+    def fit(self, df: pd.DataFrame, start: str, end: str):
         """Fit the model with the training data.
 
         :param df: DataFrame containing the training data.
         :type df: pandas.DataFrame
+        :param 
         """
         self.training_data = df
         self.set_unique_hours(df.index)
         self.start = start
         self.end = end
 
-    def set_unique_hours(self, dates):
+    def set_unique_hours(self, dates: pd.Series):
         """Set the unique hours for the model based on the provided datetime data.
 
         :param dates: Datetime data to extract unique hours from.
-        :type dates: pandas.Series or similar
+        :type dates: pandas.Series
         """
         if self.unique_hours is None:
             self.unique_hours = np.sort(dates.hour.unique())
 
-    def get_hour_variables(self, hour):
+    def get_hour_variables(self, hour: int):
         """Retrieve the variables associated with a specific hour based on defined hour ranges.
 
         :param hour: The hour for which variables are needed.
@@ -71,7 +78,7 @@ class PointModel:
             if hour_range[0] <= hour <= hour_range[1]:
                 return variables
 
-    def separate_columns_by_dtype(self, df):
+    def separate_columns_by_dtype(self, df: pd.DataFrame):
         """Separate columns in a DataFrame by data type (float vs non-float).
 
         :param df: DataFrame to separate columns from.
@@ -83,15 +90,15 @@ class PointModel:
         non_float_columns = [col for col in df.columns if col not in float_columns]
         return float_columns, non_float_columns
 
-    def fit_transform_data(self, Xy, is_train=True):
+    def fit_transform_data(self, Xy: pd.DataFrame, is_train: bool=True):
         """Fit the transformation pipeline to the data and transform it if is_train is True, otherwise, only transform the data.
 
         :param Xy: DataFrame containing features and target to be transformed.
-        :type Xy: pandas.DataFrame
+        :type Xy: pd.DataFrame
         :param is_train: Flag to indicate whether to fit the transformer or not.
         :type is_train: bool
         :return: Transformed features and optionally transformed target.
-        :rtype: tuple or pandas.DataFrame
+        :rtype: tuple or pd.DataFrame
         """
         float_columns, non_float_columns = self.separate_columns_by_dtype(
             Xy[self.all_used_columns]
@@ -110,16 +117,16 @@ class PointModel:
             return X
 
     def train_and_predict_hours(
-        self, day, Xy_train, Xy_test, predictions_list, inverse_predictions
+        self, day: pd.Timestamp, Xy_train: pd.DataFrame, Xy_test: pd.DataFrame, predictions_list: list, inverse_predictions: bool
     ):
         """Train the model and make predictions for each hour in the unique_hours, and store the predictions in a list.
 
         :param day: The day for which predictions are made.
-        :type day: pandas.Timestamp
+        :type day: pd.Timestamp
         :param Xy_train: Training data.
-        :type Xy_train: pandas.DataFrame
+        :type Xy_train: pd.DataFrame
         :param Xy_test: Testing data.
-        :type Xy_test: pandas.DataFrame
+        :type Xy_test: pd.DataFrame
         :param predictions_list: List to store the predictions.
         :type predictions_list: list
         :param inverse_predictions: Flag to determine whether to apply inverse transformation to predictions.
@@ -149,17 +156,17 @@ class PointModel:
                 elif len(prediction) > 0:
                     predictions_list.append((date_, prediction[0, 0]))
 
-    def predict(self, rolling_window=728, inverse_predictions=True):
+    def predict(self, rolling_window: int=728, inverse_predictions: bool=True):
         """Predict values over a given range, from start to end, using a rolling window, and store/update predictions in the model.
 
         :param df: DataFrame containing the data to be used for prediction.
-        :type df: pandas.DataFrame
+        :type df: pd.DataFrame
         :param rolling_window: Number of days to look back for training data.
         :type rolling_window: int
         :param inverse_predictions: Flag to determine whether to apply inverse transformation to predictions.
         :type inverse_predictions: bool
         :return: DataFrame of predicted values.
-        :rtype: pandas.DataFrame
+        :rtype: pd.DataFrame
         """
         df = self.training_data
         predictions_list = []
@@ -190,8 +197,15 @@ class PointModel:
 
         return self.predictions[[f"prediction_{rolling_window}rw"]]
 
-    def calculate_metrics(self, y_true, y_pred):
-        """Calculate regression metrics."""
+    def calculate_metrics(self, y_true: pd.DataFrame, y_pred: pd.DataFrame):
+        """Calculate regression metrics.
+        :param y_true: DataFrame containing the actual data
+        :type y_pred: pd.DataFrame
+        :param y_pred: DataFrame containing the predicted data
+        :type y_pred: pd.DataFrame
+        :return: dict of calculated regression metrics 
+        :rtype: dict
+        """
         mae = mean_absolute_error(y_true, y_pred)
         mse = mean_squared_error(y_true, y_pred)
         rmse = np.sqrt(mse)
@@ -203,7 +217,7 @@ class PointModel:
         """Generate a summary comparing stored predictions with actual values from the training data.
 
         :return: DataFrame with summary metrics.
-        :rtype: pandas.DataFrame
+        :rtype: pd.DataFrame
         """
         if self.predictions is None:
             raise ValueError("No predictions have been made yet.")

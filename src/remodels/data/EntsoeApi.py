@@ -12,12 +12,21 @@ logging.basicConfig(level=logging.INFO)
 
 
 class EntsoeApi:
-    """EntsoeApi."""
+    """
+    EntsoeApi class provides an interface to interact with the ENTSO-E Transparency Platform API, 
+    which offers access to a wide range of data about the European electricity market. 
+    This class simplifies the process of fetching and handling data from the ENTSO-E Transparency Platform API, 
+    making it more accessible and easier to integrate into various energy analysis projects.
 
-    def __init__(self, security_token: str):
-        """Initializes the EntsoeApi class.
+    The class requires a security token for authentication and provides methods 
+    to query different types of data offered by the ENTSO-E Transparency Platform API, such as electricity prices and
+    load data"""
+
+    def __init__(self, security_token: str) -> None:
+        """Initializes the EntsoeApi class with the provided security token.
 
         :param security_token: The security token for accessing the API.
+        :type security_token: str
         """
         self.base_url = "https://web-api.tp.entsoe.eu/api"
         self.security_token = security_token
@@ -28,17 +37,21 @@ class EntsoeApi:
         start_date: dt.date,
         end_date: dt.date,
         params: dict,
-        data_parser,
-        resolution_preference=None,
+        data_parser: callable,
+        resolution_preference: str=None,
     ) -> pd.DataFrame:
         """Makes a request to the API and retrieves the data.
 
         :param start_date: The start date for the data retrieval.
+        :type start_date: dt.date
         :param end_date: The end date for the data retrieval.
+        :type end_date: dt.date
         :param params: The parameters for the API request.
+        :type params: dict
         :param data_parser: The parser function for the API response.
-        :param resolution_preference: Optional resolution preference for the data
-            parser.
+        :type data_parser: function
+        :param resolution_preference: Optional resolution preference for the data parser.
+        :type resolution_preference: int, optional: 
 
         :return: A DataFrame containing the retrieved data.
         :rtype: pd.DataFrame
@@ -187,8 +200,7 @@ class EntsoeApi:
         :type end_date: datetime
         :param in_domain: The market domain for which to retrieve pricing data.
         :type in_domain: str
-        :param resolution_preference: The resolution in minutes for the pricing data
-            (optional).
+        :param resolution_preference: The resolution in minutes for the pricing data (optional).
         :type resolution_preference: int, optional
         :return: A DataFrame containing day-ahead pricing data.
         :rtype: pd.DataFrame

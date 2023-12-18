@@ -5,6 +5,7 @@ import pandas as pd
 from scipy.stats import norm
 
 from remodels.transformers.BaseScaler import BaseScaler
+from typing import Tuple
 
 
 def mad(x):
@@ -15,9 +16,14 @@ def mad(x):
 
 
 class StandardizingScaler(BaseScaler):
-    """A custom scaler for standardizing data using either the median or mean method."""
+    """A custom scaler for standardizing data using either the median or mean method.
 
-    def __init__(self, method="median"):
+    This scaler is suitable for preprocessing datasets in preparation for machine learning models. 
+    It standardizes the data, bringing it to a common scale without distorting differences in the range 
+    of values. The scaler can operate using either the median or mean to calculate the center and scale 
+    of the data."""
+
+    def __init__(self, method="median")->None:
         """Initialize the StandardizingScaler with the chosen method of centering and scaling.
 
         :param method: Method to use for centering ('median' or 'mean').
@@ -31,11 +37,11 @@ class StandardizingScaler(BaseScaler):
         self.y_center = None
         self.y_scale = None
 
-    def _compute_center_scale(self, data):
+    def _compute_center_scale(self, data: pd.DataFrame) -> Tuple:
         """Compute the center and scale of the data based on the specified method.
 
         :param data: The data for which to compute the center and scale.
-        :type data: array-like
+        :type data: pd.DataFrame
         :return: A tuple of center and scale.
         :rtype: tuple
         """
@@ -50,13 +56,13 @@ class StandardizingScaler(BaseScaler):
         scale = 1 if scale == 0 else scale
         return center, scale
 
-    def fit(self, X, y=None):
+    def fit(self, X:pd.DataFrame, y:pd.DataFrame=None)->'StandardizingScaler':
         """Fit the scaler to the features X and optionally to the target y.
 
         :param X: Features to fit.
-        :type X: array-like
+        :type X: pd.DataFrame
         :param y: Optional target to fit.
-        :type y: array-like, optional
+        :type y: pd.DataFrame, optional
         :return: The fitted scaler.
         :rtype: StandardizingScaler
         """
@@ -67,7 +73,7 @@ class StandardizingScaler(BaseScaler):
             self.y_center, self.y_scale = self._compute_center_scale(np.array(y))
         return self
 
-    def _vectorize_data(self, data, func):
+    def _vectorize_data(self, data:pd.DataFrame, func: callable)->np.array:
         """Apply a function to each column of the data and return a vector of the results.
 
         :param data: The data to vectorize.
@@ -83,18 +89,18 @@ class StandardizingScaler(BaseScaler):
             return func(data)
         return np.array([func(data[:, i]) for i in range(data.shape[1])]).T
 
-    def _apply_transform(self, data, centers, scales):
+    def _apply_transform(self, data: pd.DataFrame, centers: pd.DataFrame, scales: pd.DataFrame):
         if len(data.shape) == 1:
             return (data - centers) / scales
         return (data - centers.reshape(1, -1)) / scales.reshape(1, -1)
 
-    def transform(self, X, y=None):
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame=None) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Transform the features X and optionally the target y using the fitted scaler.
 
         :param X: Features to transform.
-        :type X: array-like
+        :type X: pd.DataFrame
         :param y: Optional target to transform.
-        :type y: array-like, optional
+        :type y: pd.DataFrame, optional
         :return: The transformed features and optionally the transformed target.
         :rtype: tuple
         """
@@ -120,7 +126,7 @@ class StandardizingScaler(BaseScaler):
             return data * scales + centers
         return data * scales.reshape(1, -1) + centers.reshape(1, -1)
 
-    def inverse_transform(self, X=None, y=None):
+    def inverse_transform(self, X:np.array, y:np.array=None):
         """Apply the inverse transformation to the features X and optionally the target y.
 
         :param X: Transformed features to inverse transform.
