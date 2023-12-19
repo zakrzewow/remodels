@@ -7,7 +7,15 @@ from .qra import QRA
 
 
 class LQRA(QRA):
-    """LQRA."""
+    r"""A class that represents the LQRA model.
+
+    The LQRA model is a quantile regression model with a linear penalty factor added to the loss function:
+
+    .. math::
+        \hat{\beta_k} = \underset{\beta \in \mathbb{R}^n}{\operatorname{argmin}} \left\{ \sum_{i=1}^{t} \rho_k (Y_i - X_i \beta) + \lambda \sum_{i=1}^{n} |\beta_i| \right\}
+
+    where :math:`\lambda` is a regularization parameter.
+    """
 
     def __init__(
         self,
@@ -15,7 +23,7 @@ class LQRA(QRA):
         lambda_: float = 0.0,
         fit_intercept: bool = False,
     ) -> None:
-        """Initialize LQRA model.
+        """Initialize the LQRA model.
 
         :param quantile: quantile
         :type quantile: float
@@ -28,7 +36,7 @@ class LQRA(QRA):
         self.lambda_ = lambda_
 
     def fit(self, X: np.array, y: np.array):
-        """Fit model.
+        """Fit the model to the data.
 
         :param X: input matrix
         :type X: np.array

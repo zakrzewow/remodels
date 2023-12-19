@@ -97,3 +97,68 @@ The `remodels` package provides a set of tools and modules for quantum risk asse
    :members:
    :inherited-members:
 ```
+
+#### QRA Models Module
+
+```{eval-rst}
+.. autoclass:: remodels.qra.qra.QRA
+   :members:
+   :inherited-members:
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.qrm.QRM
+   :members: fit
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.lqra.LQRA
+   :members: fit
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.fqra.FQRA
+   :members: fit
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.fqrm.FQRM
+   :members: fit
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.sfqra.sFQRA
+   :members: fit
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.sfqrm.sFQRM
+   :members: fit
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.sqra.SQRA
+   :members: fit
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.sqrm.SQRM
+   :members: fit
+```
+
+##### QR Tester SubModule
+
+```{eval-rst}
+.. autoclass:: remodels.qra.tester.qr_tester.QR_Tester
+   :members:
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.tester.qr_tester.QR_TestResults
+   :members: aec, ec_h, ec_mad, kupiec_test, christoffersen_test, aps, aps_extreme_quantiles
+```
+
+```{eval-rst}
+.. autoclass:: remodels.qra.tester.qr_results_summary.QR_ResultsSummary
+   :members:
+```

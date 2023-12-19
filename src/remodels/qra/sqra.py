@@ -7,12 +7,20 @@ from .qra import QRA
 
 
 class SQRA(QRA):
-    """SQRA."""
+    r"""A class that represents the SQRA model.
+
+    The SQRA model is a QRA model with a loss function smoothed by a kernel density estimator:
+
+    .. math::
+        \hat{\beta_k} = \underset{\beta \in \mathbb{R}^n}{\operatorname{argmin}} \left\{ \sum_{i=1}^{t} \left( H \cdot \phi \left( \frac{Y_i - X_i \beta}{H} \right) + \left( k - \Phi \left( - \frac{Y_i - X_i \beta}{H}\right) \right) \left( Y_i - X_i \beta \right) \right) \right\}
+
+    where :math:`H` is a bandwidth parameter.
+    """
 
     def __init__(
         self, quantile: float = 0.5, H: float = None, fit_intercept: bool = False
     ) -> None:
-        """Initialize SQRA model.
+        """Initialize the SQRA model.
 
         :param quantile: quantile
         :type quantile: float
@@ -27,7 +35,7 @@ class SQRA(QRA):
         self.H = H
 
     def fit(self, X: np.array, y: np.array):
-        """Fit model.
+        """Fit the model to the data.
 
         :param X: input matrix
         :type X: np.array

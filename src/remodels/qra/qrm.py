@@ -6,10 +6,14 @@ from .qra import QRA
 
 
 class QRM(QRA):
-    """QRM."""
+    """A class that represents the QRM model.
+
+    In the QRM model, the average of the input variables is first calculated.
+    This average is used to fit the quantile regression model.
+    """
 
     def __init__(self, quantile: float = 0.5, fit_intercept: bool = False) -> None:
-        """Initialize QRM model.
+        """Initialize the QRM model.
 
         :param quantile: quantile
         :type quantile: float
@@ -19,7 +23,7 @@ class QRM(QRA):
         super().__init__(quantile=quantile, fit_intercept=fit_intercept)
 
     def fit(self, X: np.array, y: np.array):
-        """Fit model.
+        """Fit the model to the data.
 
         :param X: input matrix
         :type X: np.array
@@ -32,7 +36,7 @@ class QRM(QRA):
         return super().fit(X, y)
 
     def predict(self, X: np.array) -> np.array:
-        """Predict dependent variable.
+        """Predict the dependent variable.
 
         :param X: input matrix
         :type X: np.array

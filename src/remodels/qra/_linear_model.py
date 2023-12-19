@@ -8,7 +8,7 @@ class _LinearModel:
     """Common abstract class for all linear models."""
 
     def __init__(self, fit_intercept: bool = False) -> None:
-        """Initialize linear model.
+        """Initialize the model.
 
         :param fit_intercept: True if fit intercept in model, defaults to False
         :type fit_intercept: bool, optional
@@ -16,7 +16,7 @@ class _LinearModel:
         self.fit_intercept = fit_intercept
 
     def fit(self, X: np.array, y: np.array) -> "_LinearModel":
-        """Fit model.
+        """Fit the model to the data.
 
         :param X: input matrix
         :type X: np.array
@@ -28,7 +28,7 @@ class _LinearModel:
         return self
 
     def predict(self, X: np.array) -> np.array:
-        """Predict dependent variable.
+        """Predict the dependent variable.
 
         :param X: input matrix
         :type X: np.array
