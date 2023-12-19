@@ -1,25 +1,25 @@
 """ClippingScaler."""
 
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 
 from remodels.transformers.BaseScaler import BaseScaler
-from typing import Tuple
 
 
 class ClippingScaler(BaseScaler):
-    """
-    Scaler that clips feature and target values to within a specified number of standard deviations from the mean.
+    """Scaler that clips feature and target values to within a specified number of standard deviations from the mean.
 
-    This scaler limits extreme values in the data by clipping them to a defined range based on a 
-    multiple of standard deviations. It is particularly useful for mitigating the effect of outliers 
+    This scaler limits extreme values in the data by clipping them to a defined range based on a
+    multiple of standard deviations. It is particularly useful for mitigating the effect of outliers
     in the data, making it more robust for various statistical analyses or machine learning models.
 
-    The scaler also provides an inverse transformation function to revert the data back to 
+    The scaler also provides an inverse transformation function to revert the data back to
     its original scale.
     """
 
-    def __init__(self, k=3)->None:
+    def __init__(self, k=3) -> None:
         """Initialize the ClippingScaler with a clipping threshold.
 
         :param k: The number of standard deviations to use as the clipping threshold.
@@ -27,7 +27,7 @@ class ClippingScaler(BaseScaler):
         """
         self.k = k
 
-    def fit(self, X:pd.DataFrame, y:pd.DataFrame=None)->'ClippingScaler':
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame = None) -> "ClippingScaler":
         """Fit the scaler to the data.
 
         This scaler does not learn anything from the data
@@ -56,7 +56,9 @@ class ClippingScaler(BaseScaler):
         condition = np.abs(data) > self.k
         return np.where(condition, self.k * np.sign(data), data)
 
-    def transform(self, X:pd.DataFrame, y:pd.DataFrame=None)-> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Transform the features and optionally the target by clipping their values.
 
         :param X: Features to transform.
@@ -74,7 +76,9 @@ class ClippingScaler(BaseScaler):
             else self._to_dataframe(X, X_transformed)
         )
 
-    def inverse_transform(self, X: pd.DataFrame=None, y:pd.DataFrame=None)-> Tuple[pd.DataFrame, pd.DataFrame]:
+    def inverse_transform(
+        self, X: pd.DataFrame = None, y: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Inverse transform the features and optionally the target by unclipping their values.
 
         This method assumes the original data was within the range [-k, k].

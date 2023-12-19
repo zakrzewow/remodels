@@ -1,13 +1,14 @@
 """BaseScaler."""
 
-import pandas as pd
 from typing import Tuple
+
+import pandas as pd
 
 
 class BaseScaler:
     """Custom scaler base class following scikit-learn's conventions."""
 
-    def fit(self, X, y=None) -> 'BaseScaler':
+    def fit(self, X, y=None) -> "BaseScaler":
         """Fit the scaler to the data. Placeholder that does nothing.
 
         :param X: Input data.
@@ -20,7 +21,9 @@ class BaseScaler:
         # No fitting process required for base scaler.
         return self
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame=None) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Transforms the data. Placeholder that should be overridden by subclasses.
 
         :param X: Input data to transform.
@@ -33,7 +36,9 @@ class BaseScaler:
         # BaseScaler does not implement transform method.
         raise NotImplementedError("Transform method not implemented.")
 
-    def _to_dataframe(self, original: pd.DataFrame, transformed: pd.DataFrame) -> pd.DataFrame:
+    def _to_dataframe(
+        self, original: pd.DataFrame, transformed: pd.DataFrame
+    ) -> pd.DataFrame:
         """Converts transformed data back to a DataFrame if the original was a DataFrame.
 
         :param original: Original input data.
@@ -50,7 +55,7 @@ class BaseScaler:
         else:
             return transformed
 
-    def fit_transform(self, X:pd.DataFrame, y:pd.DataFrame=None) -> pd.DataFrame:
+    def fit_transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
         """Fit to data, then transform it.
 
         :param X: Features to fit and transform.
@@ -65,8 +70,10 @@ class BaseScaler:
 
         # Call the transform method and return its result
         return self.transform(X, y)
-    
-    def inverse_transform(self, X:pd.DataFrame, y:pd.DataFrame=None)->Tuple[pd.DataFrame, pd.DataFrame]:
+
+    def inverse_transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Inverse transformat the data. Placeholder that should be overridden by subclasses.
 
         :param X: Input data to transform.

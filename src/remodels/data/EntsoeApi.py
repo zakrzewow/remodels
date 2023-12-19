@@ -12,15 +12,10 @@ logging.basicConfig(level=logging.INFO)
 
 
 class EntsoeApi:
-    """
-    EntsoeApi class provides an interface to interact with the ENTSO-E Transparency Platform API, 
-    which offers access to a wide range of data about the European electricity market. 
-    This class simplifies the process of fetching and handling data from the ENTSO-E Transparency Platform API, 
-    making it more accessible and easier to integrate into various energy analysis projects.
+    """EntsoeApi class provides an interface to interact with the ENTSO-E Transparency Platform API, offering access to data about the European electricity market.
 
-    The class requires a security token for authentication and provides methods 
-    to query different types of data offered by the ENTSO-E Transparency Platform API, such as electricity prices and
-    load data"""
+    This class simplifies the process of fetching and handling data from the ENTSO-E Transparency Platform API, making it more accessible and easier to integrate into various energy analysis projects. The class requires a security token for authentication and provides methods to query different types of data offered by the ENTSO-E Transparency Platform API, such as electricity prices and load data.
+    """
 
     def __init__(self, security_token: str) -> None:
         """Initializes the EntsoeApi class with the provided security token.
@@ -38,7 +33,7 @@ class EntsoeApi:
         end_date: dt.date,
         params: dict,
         data_parser: callable,
-        resolution_preference: str=None,
+        resolution_preference: str = None,
     ) -> pd.DataFrame:
         """Makes a request to the API and retrieves the data.
 
@@ -51,7 +46,7 @@ class EntsoeApi:
         :param data_parser: The parser function for the API response.
         :type data_parser: function
         :param resolution_preference: Optional resolution preference for the data parser.
-        :type resolution_preference: int, optional: 
+        :type resolution_preference: int, optional:
 
         :return: A DataFrame containing the retrieved data.
         :rtype: pd.DataFrame

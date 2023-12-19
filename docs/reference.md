@@ -1,6 +1,5 @@
 # Reference
 
-
 ### Package `remodels`
 
 The `remodels` package provides a set of tools and modules for quantum risk assessment. This section outlines the main components and functionalities of the `remodels` package.
@@ -32,6 +31,7 @@ The `remodels` package provides a set of tools and modules for quantum risk asse
    :members:
    :inherited-members:
 ```
+
 ##### VSTransformers SubModule
 
 ```{eval-rst}
@@ -45,7 +45,6 @@ The `remodels` package provides a set of tools and modules for quantum risk asse
    :members:
    :inherited-members:
 ```
-
 
 ```{eval-rst}
 .. autoclass:: remodels.transformers.VSTransformers.ClippingScaler.ClippingScaler
@@ -83,7 +82,6 @@ The `remodels` package provides a set of tools and modules for quantum risk asse
    :inherited-members:
 ```
 
-
 #### Pipeline Module
 
 ```{eval-rst}
@@ -99,8 +97,3 @@ The `remodels` package provides a set of tools and modules for quantum risk asse
    :members:
    :inherited-members:
 ```
-
-
-
-
-

@@ -1,23 +1,26 @@
 """TimeTransformers."""
 
+from typing import Tuple
+
 import pandas as pd
 
 from remodels.transformers.BaseScaler import BaseScaler
-from typing import Tuple
+
 
 class DSTAdjuster(BaseScaler):
     """A transformer for adjusting time series data to account for Daylight Saving Time (DST) changes.
 
-    This class provides functionality to modify time series data by removing timezone information and 
+    This class provides functionality to modify time series data by removing timezone information and
     resampling to an hourly frequency. It's designed to handle potential issues arising from DST transitions,
-    such as duplicate or missing timestamps. The transformer can be used with any time series data that 
-    includes timezone-aware datetime indices."""
+    such as duplicate or missing timestamps. The transformer can be used with any time series data that
+    includes timezone-aware datetime indices.
+    """
 
     def __init__(self):
         """Initialize the DSTAdjuster."""
         super().__init__()
 
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame=None)->'DSTAdjuster':
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame = None) -> "DSTAdjuster":
         """Fit the transformer to the data.
 
         This transformer does not learn anything from the data
@@ -33,7 +36,9 @@ class DSTAdjuster(BaseScaler):
         # No fitting necessary for DSTAdjuster, so just return self.
         return self
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame=None) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Transform the time series data to adjust for DST changes.
 
         :param X: Time series data to trasnsform.

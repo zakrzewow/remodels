@@ -1,19 +1,21 @@
 """RePipeline."""
 
-from sklearn.pipeline import Pipeline
-import pandas as pd
 from typing import Tuple
+
+import pandas as pd
+from sklearn.pipeline import Pipeline
 
 
 class RePipeline(Pipeline):
-    """
-    Custom implementation of the scikit-learn Pipeline class for additional functionality.
+    """Custom implementation of the scikit-learn Pipeline class for additional functionality.
 
-    This class extends the standard scikit-learn Pipeline by adding specialized handling 
+    This class extends the standard scikit-learn Pipeline by adding specialized handling
     of steps that involve both features and target data, as well as inverse transformations.
     """
 
-    def _process_step(self, step, Xt: pd.DataFrame, yt: pd.DataFrame=None, **fit_params) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
+    def _process_step(
+        self, step, Xt: pd.DataFrame, yt: pd.DataFrame = None, **fit_params
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Process a single step of the pipeline, fitting it and transforming the data.
 
         :param step: The pipeline step (transformer or estimator) to process.
@@ -36,7 +38,9 @@ class RePipeline(Pipeline):
             step.fit(Xt, **fit_params)
             return step.transform(Xt), None
 
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame=None, **fit_params) -> 'RePipeline':
+    def fit(
+        self, X: pd.DataFrame, y: pd.DataFrame = None, **fit_params
+    ) -> "RePipeline":
         """Fit the pipeline with the input and target data.
 
         :param X: Input data to fit.
@@ -56,7 +60,9 @@ class RePipeline(Pipeline):
         self.steps[-1][1].fit(Xt, yt, **fit_params)
         return self
 
-    def fit_transform(self, X:pd.DataFrame, y: pd.DataFrame=None, **fit_params) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
+    def fit_transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None, **fit_params
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Fit the pipeline and transform the data.
 
         :param X: Input data to fit.
@@ -92,9 +98,10 @@ class RePipeline(Pipeline):
             final_step.fit(Xt, yt, **fit_params)
             return final_step.transform(Xt), yt
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame=None) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        Apply transforms to the data, and the transform method of the final estimator.
+    def transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Apply transforms to the data, and the transform method of the final estimator.
 
         :param X: Input data to transform.
         :type X: pd.DataFrame
@@ -113,7 +120,9 @@ class RePipeline(Pipeline):
         # Transform the last step.
         return self.steps[-1][1].transform(Xt, yt)
 
-    def inverse_transform(self, Xt: pd.DataFrame=None, yt:pd.DataFrame=None) ->  Tuple[pd.DataFrame, pd.DataFrame]:
+    def inverse_transform(
+        self, Xt: pd.DataFrame = None, yt: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Apply inverse transformations in reverse order of the data.
 
         :param Xt: Transformed feature data to inverse transform.
