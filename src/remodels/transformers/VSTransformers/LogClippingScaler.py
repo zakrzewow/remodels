@@ -1,12 +1,23 @@
 """LogClippingScaler."""
 
+from typing import Tuple
+
 import numpy as np
+import pandas as pd
 
 from remodels.transformers.BaseScaler import BaseScaler
 
 
 class LogClippingScaler(BaseScaler):
-    """Scaler that applies a logarithmic transformation to values exceeding a threshold k."""
+    """Scaler that applies a logarithmic transformation to values exceeding a specified threshold.
+
+    This scaler is designed to transform features by applying a logarithmic transformation, but only to
+    values that exceed a certain threshold, 'k'. This approach can be particularly useful in reducing the
+    impact of outliers or extreme values in the data, while maintaining the scale of the rest of the data.
+
+    The scaler also provides an inverse transformation function to revert the data back to
+    its original scale.
+    """
 
     def __init__(self, k=3):
         """Initialize the scaler with a clipping threshold.
@@ -32,12 +43,17 @@ class LogClippingScaler(BaseScaler):
         )
         return data_transformed
 
-    def transform(self, X, y=None):
+    def transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Apply the transformation to the features and optionally the target.
 
         :param X: Features to transform.
+        :type X: pd.DataFrame
         :param y: Optional target to transform.
+        :type y: pd.DataFrame, optional
         :return: Transformed features and optionally transformed target.
+        :rtype: pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]
         """
         X_transformed = self._transform_data(X)
         y_transformed = self._transform_data(y) if y is not None else None
@@ -47,12 +63,17 @@ class LogClippingScaler(BaseScaler):
             else self._to_dataframe(X, X_transformed)
         )
 
-    def inverse_transform(self, X=None, y=None):
+    def inverse_transform(
+        self, X: pd.DataFrame = None, y: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Apply the inverse log clipping transformation to the features and optionally the target.
 
         :param X: Transformed features to inverse transform.
+        :type X: pd.DataFrame
         :param y: Transformed target to inverse transform.
-        :return: Inverse transformed features and optionally inverse transformed target.
+        :type y: pd.DataFrame, optional
+        :return: Original features and optionally original target.
+        :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
 
         def invert(data):

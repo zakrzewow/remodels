@@ -1,5 +1,7 @@
 """PITScaler."""
 
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
@@ -9,30 +11,40 @@ from remodels.transformers.BaseScaler import BaseScaler
 
 
 class PITScaler(BaseScaler):
-    """PIT-Scaler."""
+    """Probability Integral Transform (PIT) Scaler applies a transformation to data based on a specified probability distribution.
 
-    def __init__(self, distribution="normal", nu=8):
+    This scaler transforms each feature using the cumulative distribution function (CDF) of the specified distribution,
+    effectively mapping the empirical CDF of the data to the target distribution. This technique is often used
+    in statistical modeling and forecasting to normalize data or make it conform to a certain distribution.
+
+    The scaler also provides an inverse transformation function to revert the data back to
+    its original scale.
+    """
+
+    def __init__(self, distribution: str = "normal", nu: int = 8) -> None:
         """Initialize the PIT-Scaler.
 
         :param distribution: distribution, defaults to "normal"
         :type distribution: str, optional
         :param nu: distribution parameter, defaults to 8
         :type nu: int, optional
+
         """
         self.distribution = distribution
         self.nu = nu
         self.empirical_cdfs = {}
         self.y_column_name = None
 
-    def fit(self, X, y=None):
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame = None) -> "PITScaler":
         """Fit the scaler to the data.
 
         :param X: Input data.
-        :type X: array-like
+        :type X: pd.DataFrame
         :param y: Optional, target values (None by default).
-        :type y: array-like, optional
+        :type y: pd.DataFrame, optional
         :return: Returns self.
         :rtype: PITScaler
+
         """
         if y is not None:
             y_name = y.columns[0]
@@ -48,15 +60,18 @@ class PITScaler(BaseScaler):
             )
         return self
 
-    def transform(self, X, y=None):
+    def transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Transforms the data.
 
         :param X: Input data to transform.
-        :type X: array-like
+        :type X: pd.DataFrame
         :param y: Optional, target values (None by default).
-        :type y: array-like, optional
+        :type y: pd.DataFrame, optional
         :return: Transformed data.
-        :rtype: array-like
+        :rtype: pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]
+
         """
         transformed_data = pd.DataFrame(index=X.index)
         for column in X.columns:
@@ -85,15 +100,18 @@ class PITScaler(BaseScaler):
         else:
             raise ValueError("Invalid distribution type. Use 'normal' or 'student-t'.")
 
-    def inverse_transform(self, X=None, y=None):
+    def inverse_transform(
+        self, X: pd.DataFrame = None, y: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Inverse transform the features and optionally the target.
 
         :param X: Transformed features to inverse transform.
-        :type X: np.ndarray
+        :type X: pd.DataFrame
         :param y: Transformed target to inverse transform.
-        :type y: np.ndarray, optional
+        :type y: pd.DataFrame, optional
         :return: Original features and optionally original target.
-        :rtype: tuple
+        :rtype: Tuple[pd.DataFrame, pd.DataFrame]
+
         """
         if X is not None:
             inverted_data = pd.DataFrame(index=X.index)
