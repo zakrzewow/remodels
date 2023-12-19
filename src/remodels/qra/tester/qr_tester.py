@@ -39,7 +39,7 @@ class QR_Tester:
         max_workers: int = None,
         progress: bool = True,
     ) -> None:
-        """Initialize the QR Tsester.
+        """Initialize the QR Tester.
 
         :param calibration_window: length of calibration window, defaults to 14
         :type calibration_window: int, optional

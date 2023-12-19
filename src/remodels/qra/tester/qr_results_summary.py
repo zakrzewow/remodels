@@ -10,7 +10,7 @@ from .qr_tester import QR_TestResults
 
 
 class QR_ResultsSummary:
-    """QR Results Summary."""
+    """A class to summarize QR Test Results."""
 
     table_styles = [
         {"selector": ".red", "props": "background-color: #fcb8b8;"},
@@ -19,7 +19,7 @@ class QR_ResultsSummary:
     ]
 
     def __init__(self, results_dict: Dict[str, Dict[str, QR_TestResults]]) -> None:
-        """QR Results Summary.
+        """Initialize the QR Results Summary class.
 
         :param results_dict: dictionary of results by dataset and QR variant
         :type results_dict: Dict[str, Dict[str, QR_TestResults]]
