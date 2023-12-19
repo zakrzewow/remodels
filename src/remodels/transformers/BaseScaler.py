@@ -1,12 +1,14 @@
 """BaseScaler."""
 
+from typing import Tuple
+
 import pandas as pd
 
 
 class BaseScaler:
     """Custom scaler base class following scikit-learn's conventions."""
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None) -> "BaseScaler":
         """Fit the scaler to the data. Placeholder that does nothing.
 
         :param X: Input data.
@@ -19,7 +21,9 @@ class BaseScaler:
         # No fitting process required for base scaler.
         return self
 
-    def transform(self, X, y=None):
+    def transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]:
         """Transforms the data. Placeholder that should be overridden by subclasses.
 
         :param X: Input data to transform.
@@ -27,12 +31,14 @@ class BaseScaler:
         :param y: Optional, target values (None by default).
         :type y: array-like, optional
         :return: Transformed data.
-        :rtype: array-like
+        :rtype: pd.DataFrame or Tuple[pd.DataFrame, pd.DataFrame]
         """
         # BaseScaler does not implement transform method.
         raise NotImplementedError("Transform method not implemented.")
 
-    def _to_dataframe(self, original, transformed):
+    def _to_dataframe(
+        self, original: pd.DataFrame, transformed: pd.DataFrame
+    ) -> pd.DataFrame:
         """Converts transformed data back to a DataFrame if the original was a DataFrame.
 
         :param original: Original input data.
@@ -40,7 +46,7 @@ class BaseScaler:
         :param transformed: Transformed data.
         :type transformed: array-like
         :return: Transformed data as a DataFrame if original was a DataFrame, otherwise array-like.
-        :rtype: DataFrame or array-like
+        :rtype: pd.DataFrame
         """
         if isinstance(original, pd.DataFrame):
             return pd.DataFrame(
@@ -49,7 +55,7 @@ class BaseScaler:
         else:
             return transformed
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
         """Fit to data, then transform it.
 
         :param X: Features to fit and transform.
@@ -64,3 +70,18 @@ class BaseScaler:
 
         # Call the transform method and return its result
         return self.transform(X, y)
+
+    def inverse_transform(
+        self, X: pd.DataFrame, y: pd.DataFrame = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Inverse transformat the data. Placeholder that should be overridden by subclasses.
+
+        :param X: Input data to transform.
+        :type X: array-like
+        :param y: Optional, target values (None by default).
+        :type y: array-like, optional
+        :return: Transformed data.
+        :rtype: array-like
+        """
+        # BaseScaler does not implement transform method.
+        raise NotImplementedError("Transform method not implemented.")
