@@ -6,12 +6,16 @@ from .sqra import SQRA
 
 
 class SQRM(SQRA):
-    """SQRM."""
+    """A class that represents the SQRM model.
+
+    In the SQRM model, the average of the input variables is first calculated.
+    This average is used to fit the SQRA model.
+    """
 
     def __init__(
         self, quantile: float = 0.5, H: float = None, fit_intercept: bool = False
     ) -> None:
-        """Initialize SQRM model.
+        """Initialize the SQRM model.
 
         :param quantile: quantile
         :type quantile: float
@@ -23,7 +27,7 @@ class SQRM(SQRA):
         super().__init__(quantile=quantile, H=H, fit_intercept=fit_intercept)
 
     def fit(self, X: np.array, y: np.array):
-        """Fit model.
+        """Fit the model to the data.
 
         :param X: input matrix
         :type X: np.array
@@ -36,7 +40,7 @@ class SQRM(SQRA):
         return super().fit(X, y)
 
     def predict(self, X: np.array) -> np.array:
-        """Predict dependent variable.
+        """Predict the dependent variable.
 
         :param X: input matrix
         :type X: np.array

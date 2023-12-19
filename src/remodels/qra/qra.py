@@ -7,10 +7,24 @@ from ._linear_model import _LinearModel
 
 
 class QRA(_LinearModel):
-    """QRA."""
+    r"""A class that represents the QRA model.
+
+    The QRA model is a simple quantile regression model.
+    Fitting a quantile regression model involves solving a minimaztion problem:
+
+    .. math::
+        \hat{\beta_k} = \underset{\beta \in \mathbb{R}^n}{\operatorname{argmin}} \left\{ \sum_{i=1}^{t} \rho_k (Y_i - X_i \beta) \right\}
+
+    where :math:`\rho_k` is given by:
+
+    .. math::
+        \rho_k (e) = e (k - {1}_{(e < 0)} )
+
+    and :math:`k` is the fixed quantile.
+    """
 
     def __init__(self, quantile: float = 0.5, fit_intercept: bool = False) -> None:
-        """Initialize QRA model.
+        """Initialize the QRA model.
 
         :param quantile: quantile
         :type quantile: float
@@ -21,7 +35,7 @@ class QRA(_LinearModel):
         super().__init__(fit_intercept)
 
     def fit(self, X: np.array, y: np.array):
-        """Fit model.
+        """Fit the model to the data.
 
         :param X: input matrix
         :type X: np.array

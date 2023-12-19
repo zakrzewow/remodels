@@ -23,7 +23,12 @@ _default_qr_model = QRA(fit_intercept=True)
 
 
 class QR_Tester:
-    """QR Tester."""
+    """QR Tester is a class for testing QR models.
+
+    QR Tester class is a class designed to obtain probabilistic predictions using a given QR model.
+
+    The QR model is fitted to the data portion specified by the calibration window. Then, the QR model predictions for all percentiles are calculated. The process is repeated for subsequent portions of data.
+    """
 
     def __init__(
         self,
@@ -34,7 +39,7 @@ class QR_Tester:
         max_workers: int = None,
         progress: bool = True,
     ) -> None:
-        """Init tester.
+        """Initialize the QR Tsester.
 
         :param calibration_window: length of calibration window, defaults to 14
         :type calibration_window: int, optional
@@ -53,14 +58,14 @@ class QR_Tester:
         self.progress = progress
 
     def fit_predict(self, X: np.array, y: np.array) -> "QR_TestResults":
-        """Fit predict.
+        """Run QR Tester to obtain probabilistic predictions wrapped in special results class.
 
         :param X: data matrix
         :type X: np.array
         :param y: endogenous variable
         :type y: np.array
-        :return: Results object
-        :rtype: _Results
+        :return: QR_TestResults object
+        :rtype: QR_TestResults
         """
         executor = concurrent.futures.ProcessPoolExecutor(self.max_workers)
 
@@ -176,7 +181,10 @@ def f_ave(*results: Iterable["QR_TestResults"]):
 
 
 class QR_TestResults:
-    """Results."""
+    """A class that wraps probabilistic predictions.
+
+    The QR Test Results allows you to calculate metric values.
+    """
 
     def __init__(
         self,
@@ -184,7 +192,7 @@ class QR_TestResults:
         y_test: np.array,
         prediction_window: int,
     ) -> None:
-        """Results.
+        """Initialize the QR Test Results class.
 
         :param Y_pred: matrix of predictions
         :type Y_pred: np.array
@@ -246,7 +254,7 @@ class QR_TestResults:
         return ec_h
 
     def ec_mad(self, alpha: int) -> float:
-        """Empirical coverage per 'hour' MAD.
+        """Empirical coverage per 'hour' - mean absolute deviation.
 
         :param alpha: length of prediction interval
         :type alpha: int
@@ -256,7 +264,7 @@ class QR_TestResults:
         return np.mean(np.abs(self.ec_h(alpha) - alpha / 100))
 
     def kupiec_test(self, alpha: int, significance_level: float = 0.05) -> int:
-        """Kupiec test.
+        """Kupiec test. Count the number of times the null hypothesis is not rejected.
 
         :param alpha: length of predition interval
         :type alpha: int
@@ -270,7 +278,7 @@ class QR_TestResults:
         )
 
     def christoffersen_test(self, alpha: int, significance_level: float = 0.05) -> int:
-        """Christoffersen test.
+        """Christoffersen test. Count the number of times the null hypothesis is not rejected.
 
         :param alpha: length of predition interval
         :type alpha: int

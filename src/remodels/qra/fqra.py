@@ -9,16 +9,20 @@ from .qra import QRA
 
 
 class FQRA(QRA):
-    """FQRA."""
+    """A class that represents the FQRA model.
+
+    In the FQRA model, factors summarizing the information in the input variables are estimated with PCA method.
+    Selected number of factors is used to fit the quantile regression model.
+    """
 
     def __init__(
         self, quantile: float = 0.5, n_factors: int = None, fit_intercept: bool = False
     ) -> None:
-        """Initialize FQRA model.
+        """Initialize the FQRA model.
 
         :param quantile: quantile
         :type quantile: float
-        :param n_factors: number of factors (principal components) used
+        :param n_factors: number of factors (principal components) to use; if None, number of factors is selected automatically using  Bayesian information criterion
         :type n_factors: int
         :param fit_intercept: True if fit intercept in model, defaults to False
         :type fit_intercept: bool, optional
@@ -27,7 +31,7 @@ class FQRA(QRA):
         self.n_factors = n_factors
 
     def fit(self, X: np.array, y: np.array):
-        """Fit model.
+        """Fit the model to the data.
 
         :param X: input matrix
         :type X: np.array
@@ -41,7 +45,7 @@ class FQRA(QRA):
         return self
 
     def predict(self, X: np.array) -> np.array:
-        """Predict dependent variable.
+        """Predict the dependent variable.
 
         :param X: input matrix
         :type X: np.array
