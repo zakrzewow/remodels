@@ -1,4 +1,5 @@
 """PointModel."""
+
 import datetime as dt
 
 import numpy as np
@@ -19,7 +20,7 @@ class PointModel:
     """
 
     def __init__(
-        self, pipeline: RePipeline, variables_per_hour: dict, y_column="price_da"
+        self, pipeline: RePipeline, variables_per_hour: dict = {}, y_column="price_da"
     ):
         """Initialize the PointModel with a data processing pipeline, variables mapped to each hour, and the target column name.
 
@@ -145,6 +146,8 @@ class PointModel:
         """
         for hour in self.unique_hours:
             hour_variables = self.get_hour_variables(hour)
+            if hour_variables is None:
+                hour_variables = self.all_used_columns
             Xy_train_hour = Xy_train.loc[Xy_train.index.hour == hour]
             X_test_hour = Xy_test.loc[Xy_test.index.hour == hour][hour_variables]
             Xy_train_hour, y_train_hour = self.fit_transform_data(
@@ -167,23 +170,25 @@ class PointModel:
                 elif len(prediction) > 0:
                     predictions_list.append((date_, prediction[0, 0]))
 
-    def predict(self, rolling_window: int = 728, inverse_predictions: bool = True):
+    def predict(self, calibration_window: int = 728, inverse_predictions: bool = True):
         """Predict values over a given range, from start to end, using a rolling window, and store/update predictions in the model.
 
         :param df: DataFrame containing the data to be used for prediction.
         :type df: pd.DataFrame
-        :param rolling_window: Number of days to look back for training data.
-        :type rolling_window: int
+        :param calibration_window: Number of days to look back for training data.
+        :type calibration_window: int
         :param inverse_predictions: Flag to determine whether to apply inverse transformation to predictions.
         :type inverse_predictions: bool
         :return: DataFrame of predicted values.
         :rtype: pd.DataFrame
         """
         df = self.training_data
+        if not len(self.all_used_columns):
+            self.all_used_columns = df.drop(columns=self.y_column).columns.tolist()
         predictions_list = []
         for day in pd.date_range(self.start, self.end, freq="D"):
             Xy_train = df.loc[
-                (df.index.date >= day.date() - dt.timedelta(days=rolling_window))
+                (df.index.date >= day.date() - dt.timedelta(days=calibration_window))
                 & (df.index.date < day.date())
             ][self.all_used_columns + self.y_column].dropna()
             Xy_test = df.loc[df.index.date == day.date()][
@@ -194,7 +199,7 @@ class PointModel:
             )
 
         new_predictions_df = pd.DataFrame(
-            predictions_list, columns=["DateTime", f"prediction_{rolling_window}rw"]
+            predictions_list, columns=["DateTime", f"prediction_{calibration_window}rw"]
         )
         new_predictions_df.set_index("DateTime", inplace=True)
 
@@ -206,7 +211,7 @@ class PointModel:
         else:
             self.predictions = new_predictions_df
 
-        return self.predictions[[f"prediction_{rolling_window}rw"]]
+        return self.predictions[[f"prediction_{calibration_window}rw"]]
 
     def calculate_metrics(self, y_true: pd.DataFrame, y_pred: pd.DataFrame):
         """Calculate regression metrics.
