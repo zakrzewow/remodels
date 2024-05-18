@@ -48,9 +48,7 @@ jobs:
 
       - name: Install Poetry
         run: |
-          pwd
-          cat .github/workflows/constraints.txt
-          pipx install --pip-args=--constraint=.github/workflows/constraints.txt poetry
+          pipx install poetry==1.1.13
           poetry --version
 
       - name: Install Nox
