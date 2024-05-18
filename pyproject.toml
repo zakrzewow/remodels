@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "remodels"
-version = "0.2.0"
+version = "1.0.0"
 description = "remodels"
 authors = ["Grzegorz Zakrzewski <zakrzew12@gmail.com>"]
 license = "MIT"
