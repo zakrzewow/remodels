@@ -54,7 +54,7 @@ jobs:
       - name: Install Nox
         run: |
           pipx install nox==2022.1.7
-          pipx inject nox==2022.1.7 nox-poetry==1.0.0
+          pipx inject nox nox-poetry
           nox --version
 
       - name: Compute pre-commit cache key
@@ -124,7 +124,7 @@ jobs:
       - name: Install Nox
         run: |
           pipx install nox==2022.1.7
-          pipx inject nox==2022.1.7 nox-poetry==1.0.0
+          pipx inject nox nox-poetry
           nox --version
 
       - name: Download coverage data
