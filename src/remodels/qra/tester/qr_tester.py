@@ -41,9 +41,9 @@ class QR_Tester:
     ) -> None:
         """Initialize the QR Tester.
 
-        :param calibration_window: length of calibration window, defaults to 14
+        :param calibration_window: length of calibration window, defaults to 7 * 24
         :type calibration_window: int, optional
-        :param prediction_window: length of prediction window, defaults to 1
+        :param prediction_window: length of prediction window, defaults to 24
         :type prediction_window: int, optional
         :param qr_model: *QR* model, defaults to QRA(fit_intercept=True)
         :type qr_model: QRA, optional

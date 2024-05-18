@@ -79,7 +79,7 @@ def test_pointmodel_predict(sample_dfs: Tuple[pd.DataFrame, pd.DataFrame]) -> No
     )
 
     model.fit(X_df.join(y_df), start="2023-01-10", end="2023-01-14")
-    predictions = model.predict(rolling_window=5, inverse_predictions=True)
+    predictions = model.predict(calibration_window=5, inverse_predictions=True)
     assert isinstance(predictions, pd.DataFrame)
 
 
@@ -98,6 +98,6 @@ def test_pointmodel_summary(sample_dfs: Tuple[pd.DataFrame, pd.DataFrame]) -> No
     )
 
     model.fit(X_df.join(y_df), start="2023-01-10", end="2023-01-14")
-    model.predict(rolling_window=5, inverse_predictions=True)
+    model.predict(calibration_window=5, inverse_predictions=True)
     summary = model.summary()
     assert isinstance(summary, pd.DataFrame)

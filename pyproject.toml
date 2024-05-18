@@ -9,7 +9,7 @@ homepage = "https://github.com/zakrzewow/remodels"
 repository = "https://github.com/zakrzewow/remodels"
 documentation = "https://remodels.readthedocs.io"
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 3 - Alpha",
 ]
 
 [tool.poetry.urls]

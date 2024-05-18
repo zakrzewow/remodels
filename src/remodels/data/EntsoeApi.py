@@ -79,7 +79,11 @@ class EntsoeApi:
                 self.logger.error(f"An unexpected error occurred: {e}")
                 break
 
-        return pd.DataFrame(data).set_index("datetime") if data else pd.DataFrame()
+        return (
+            pd.DataFrame(data).set_index("datetime").tz_localize(None)
+            if data
+            else pd.DataFrame()
+        )
 
     def _parse_production_and_load_data(self, content: str) -> list:
         """Parses the production and load data from the API's XML response.

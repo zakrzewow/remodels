@@ -21,6 +21,31 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
+ReModels is a Python package for probabilistic energy price forecasting using eight Quantile Regression Averaging (QRA) methods.
+
+### Features
+
+- **Dataset Download**: access commonly used public datasets for transparent data acquisition.
+- **Data Preprocessing**: apply variance stabilizing transformation for improved data quality.
+- **Forecast Generation**: produce point and probabilistic forecasts with reference implementations of QRA variants.
+- **Result Evaluation**: compare predictions using dedicated metrics for fair and consistent evaluation.
+
+ReModels provides a robust framework for researchers to compare different QRA methods and other forecasting techniques. It supports the development of new forecasting methods, extending beyond energy price forecasting.
+
+ReModels simplifies and enhances energy price forecasting research with comprehensive tools and transparent methodologies.
+
+Implemented QRA variants:
+
+- QRA
+- QRM
+- FQRA
+- FQRM
+- sFQRA
+- sFQRM
+- LQRA
+- SQRA
+- SQRM
+
 ## Installation
 
 You can install _remodels_ via [pip] from [PyPI]:
@@ -39,7 +64,7 @@ $ pip install .
 
 ## Usage
 
-Please see the [Usage] for details.
+Please see the [Usage] or the [Reference] for details.
 
 ## License
 
@@ -59,3 +84,4 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 
 [license]: https://github.com/zakrzewow/remodels/blob/main/LICENSE
 [usage]: https://remodels.readthedocs.io/en/latest/usage.html
+[reference]: https://remodels.readthedocs.io/en/latest/reference.html
