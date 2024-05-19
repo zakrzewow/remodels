@@ -6,6 +6,7 @@ end-before: <!-- github-only -->
 
 [license]: license
 [usage]: usage
+[reference]: reference
 
 ```{toctree}
 ---

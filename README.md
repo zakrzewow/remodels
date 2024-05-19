@@ -21,30 +21,7 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
-ReModels is a Python package for probabilistic energy price forecasting using eight Quantile Regression Averaging (QRA) methods.
-
-### Features
-
-- **Dataset Download**: access commonly used public datasets for transparent data acquisition.
-- **Data Preprocessing**: apply variance stabilizing transformation for improved data quality.
-- **Forecast Generation**: produce point and probabilistic forecasts with reference implementations of QRA variants.
-- **Result Evaluation**: compare predictions using dedicated metrics for fair and consistent evaluation.
-
-ReModels provides a robust framework for researchers to compare different QRA methods and other forecasting techniques. It supports the development of new forecasting methods, extending beyond energy price forecasting.
-
-ReModels simplifies and enhances energy price forecasting research with comprehensive tools and transparent methodologies.
-
-Implemented QRA variants:
-
-- QRA
-- QRM
-- FQRA
-- FQRM
-- sFQRA
-- sFQRM
-- LQRA
-- SQRA
-- SQRM
+ReModels is a Python package for probabilistic energy price forecasting using Quantile Regression Averaging (QRA) methods.
 
 ## Installation
 
@@ -62,9 +39,68 @@ $ cd remodels
 $ pip install .
 ```
 
+## Features
+
+- **Dataset Download**: access commonly used public datasets for transparent data acquisition.
+- **Data Preprocessing**: apply variance stabilizing transformation for improved data quality.
+- **Forecast Generation**: produce point and probabilistic forecasts with reference implementations of QRA variants.
+- **Result Evaluation**: compare predictions using dedicated metrics for fair and consistent evaluation.
+
+ReModels provides a robust framework for researchers to compare different QRA methods and other forecasting techniques. It supports the development of new forecasting methods, extending beyond energy price forecasting.
+
+ReModels simplifies and enhances energy price forecasting research with comprehensive tools and transparent methodologies.
+
+The main functionality of the ReModels package are Variance Stabilizing Transformations and Quantile Regression Averaging variants.
+
+Implemented VSTs:
+
+- clipping,
+- clipping with the logarithm function
+- logistic transform
+- inverse hyperbolic sine transform
+- BoxCox transform
+- polynomial transform
+- mirror-log transformation
+- probability integral transform
+
+Implemented QRA variants:
+
+- QRA
+- QRM
+- FQRA
+- FQRM
+- sFQRA
+- sFQRM
+- LQRA
+- SQRA
+- SQRM
+
 ## Usage
 
-Please see the [Usage] or the [Reference] for details.
+VST basic usage example:
+
+```py
+import numpy as np
+from remodels.transformers.VSTransformers import ArcsinhScaler, BoxCoxScaler, ClippingScaler, LogClippingScaler, LogisticScaler, MLogScaler, PITScaler, PolyScaler
+
+X = np.random.normal(0, 1, size=(100, 10))
+ArcsinhScaler().fit_transform(X)
+```
+
+QRA basic usage example:
+
+```py
+import numpy as np
+from remodels.qra import QRA, QRM, FQRA, FQRM, sFQRA, sFQRM, LQRA, SQRA, SQRM
+
+X = np.random.normal(0, 1, size=(100, 10))
+y = X.sum(axis=1)
+
+qra = QRA(quantile=0.5, fit_intercept=True)
+qra.fit(X, y).predict(X)
+```
+
+For more advanced examples of high-level functionalities, please see the [Usage] or [Reference].
 
 ## License
 
