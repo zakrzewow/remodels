@@ -17,8 +17,8 @@ end_date = dt.date(2023, 7, 1)
 ```
 
 ```python
-# to use Entsoe API, you need a free account to obtain a security token
-security_token = "7032e795-c8ae-4a50-aac8-a377b64b1c9e"
+# to use Entsoe API, you need a free account to obtain a security token (https://transparency.entsoe.eu/)
+security_token = "your-token-here"
 
 entsoeApi = EntsoeApi(security_token)
 ```
